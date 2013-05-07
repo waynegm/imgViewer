@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<title>JQuery Image Viewer Plugin Demo</title>
+		
+		<script type="text/javascript" src="libs/jquery-1.8.2.js"></script>
+		<script type="text/javascript" src="libs/jquery-ui.js"></script>
+		<script type="text/javascript" src="libs/jquery.mousewheel.min.js"></script>
+		<script type="text/javascript" src="src/imgViewer.js"></script>
+	</head>
+	<body>
+			<h1>JQuery Image Viewer Plugin Demo</h1>
+			
+			<h2>No Container - Fixed Image Size</h2>
+				<img  id="image1" src="image/test_image.jpg" width="800" />
+				<p> Click Position <span id="position"> </span></p>
+			<h2>No Container - Dynamic Width</h2>
+				<img  id="image2" src="image/test_image.jpg" width="70%" />
+				<p> Click Position <span id="position2"> </span></p>
+			
+			<h2>No Container - Fixed Size with Border and Padding</h2>
+				<img id="image3" src="image/test_image.jpg" style="border: 30px solid #ccc; padding:20px;" width="800"/>
+
+			<h2>Centred in a div - Dynamic Width</h2>
+				<div align="center">
+					<img  id="image4" src="image/test_image.jpg" width="70%" />
+				</div>
+<script type="text/javascript">
+;(function($) {
+		$("#image1").imgViewer({
+			onClick: function( e, self ) {
+				var pos = self.cursorToImg( e.pageX, e.pageY);
+				$("#position").html(e.pageX + " " + e.pageY + " " + pos.relx + " " + pos.rely);
+			}
+		});
+		function test(e, self) {
+				var pos = self.cursorToImg( e.pageX, e.pageY);
+				$("#position2").html(e.pageX + " " + e.pageY + " " + pos.relx + " " + pos.rely);
+		}
+		var img = $("#image2").imgViewer();
+		img.imgViewer("option", "onClick", test);
+		
+		$("#image3").imgViewer();
+		$("#image4").imgViewer();
+})(jQuery);
+</script>
+		</body>
+</html>

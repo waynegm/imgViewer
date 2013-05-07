@@ -20,12 +20,12 @@ Include either the development version or minified production version of the JS 
 
 ```html
 <head>
-...
-<script src="jquery.js"></script>
-<script src="jquery-ui.js"></script>
-<script src="jquery.mousewheel.js"></script>
-<script src="jquery.imgViewer.min.js"></script>
-...
+	...
+	<script src="jquery.js"></script>
+	<script src="jquery-ui.js"></script>
+	<script src="jquery.mousewheel.js"></script>
+	<script src="jquery.imgViewer.min.js"></script>
+	...
 </head>
 ```
 
@@ -33,15 +33,15 @@ Put an image element and a javascript block to attach the plugin to the image in
 
 ```html
 <body>
-...
-<img  id="image1" src="test.jpg" width="50%" />              
-...
-<script>
-(function($) {
-$("#image1").imgViewer();
-})(JQuery);
-</script>
-...
+	...
+	<img  id="image1" src="test.jpg" width="50%" />              
+	...
+	<script>
+		(function($) {
+			$("#image1").imgViewer();
+		})(JQuery);
+	</script>
+	...
 </body>
 ```
 ## Options
@@ -92,8 +92,8 @@ $("#image1").imgViewer("option", "onClick", function(e, self) {
 $("#image1").imgViewer("option", "onUpdate", function(e, self) {
 	var pos = {
 				relx: self.bgCenter.x/self.bgWidth,
-				rely: self.bgCentre.y/self.bgHeight
-	};
+				rely: self.bgCenter.y/self.bgHeight
+			};
 	$("#centre_position").html(pos.relx + " " + pos.rely);
 });
 ```
