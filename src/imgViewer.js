@@ -144,6 +144,7 @@
 					if (parseFloat(value) < 1 || isNaN(parseFloat(value))) {
 						return;
 					}
+					this.update();
 					break;
 				case 'zoomStep':
 					if (parseFloat(value) <= 0 ||  isNaN(parseFloat(value))) {
@@ -157,7 +158,6 @@
 			} else {
 				$.Widget.prototype._setOption.apply(this, arguments);
 			}
-			this.update();
 		},
   
 		imgToCursor: function(relx, rely) {
@@ -208,8 +208,8 @@
 			} else {
 				zTop = half_height - this.bgCenter.y * zoom;
 				zLeft = half_width - this.bgCenter.x * zoom;
-				zWidth = width * zoom;
-				zHeight = height * zoom;
+				zWidth = Math.round(width * zoom);
+				zHeight = Math.round(height * zoom);
 				if (zLeft > 0) {
 					this.bgCenter.x = half_width/zoom;
 					zLeft=0;
@@ -225,9 +225,11 @@
 					zTop = height - zHeight;
 				}
 			}
+			zLeft = Math.round(zLeft + this.offsetPadding.x);
+			zTop = Math.round(zTop + this.offsetPadding.y);
 			$img.css({
-						backgroundSize: zWidth+'px '+zHeight+'px',
-						backgroundPosition: (zLeft + this.offsetPadding.x)+'px '+ (zTop + this.offsetPadding.y)+'px'
+						backgroundSize: zWidth + 'px ' + zHeight + 'px',
+						backgroundPosition: zLeft + 'px ' + zTop + 'px'
 			});
 			this._trigger("onUpdate", null, this);
 		}
