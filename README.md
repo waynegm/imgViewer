@@ -3,7 +3,7 @@ imgViewer
 
 imgViewer is a jQuery plugin that adds to an image the ability to zoom in and out with the mousewheel 
 and pan around by click and drag. A unique feature of this plugin is it's ability to work on images 
-which have widths or heights specified as a percentage of their container. 
+which have widths or heights specified as a percentage of their container. Try out the [demo](http://waynegm.github.io/imgViewer/)
 
 ## Dependencies
 The plugin is known to work with the configuration described below:
