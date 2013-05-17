@@ -38,7 +38,7 @@ module.exports = function(grunt) {
 		all: {
 			options: {
 				urls: ['1.8.0', '1.9.0', '2.0.0'].map(function(version) {
-					return 'http://localhost:<%= connect.server.options.port %>/test/imgviewer.html?jquery='+version;
+					return 'http://localhost:<%= connect.server.options.port %>/test/imgViewer.html?jquery='+version;
 				})
 			}
 		}
