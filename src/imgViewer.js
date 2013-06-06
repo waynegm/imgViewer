@@ -35,9 +35,11 @@
 			self.vCenter = {};
 //		a flag used to decide if a mouse click is part of a drag or a proper click
 			self.dragging = false;
-			
-			$img.one("load", function() {
+//		a flag used to check the target image has loaded
+			self.ready = false;
+			$img.one("load",function() {
 //			get and some geometry information about the image
+				self.ready = true;
 				var	width = $img.width(),
 					height = $img.height(),
 					offset = $img.offset();
@@ -85,6 +87,9 @@
 									x: width/2,
 									y: height/2
 					};
+					self.update();
+			}).each(function() {
+				if (this.complete) { $(this).load(); }
 			});
 /*
  *		Mousewheel event handler for image zooming
@@ -96,7 +101,7 @@
 			});
 /*
  *		Mouse drag handler for image panning
- */					
+ */
 			$zimg.mousedown( function(e) {
 				e.preventDefault();
 				var last = e;
@@ -112,8 +117,10 @@
 					e.preventDefault();
 					setTimeout(function() {	self.dragging = false; }, 0);
 					$zimg.unbind("mousemove");
+					$zimg.unbind("mouseup");
+					$(document).unbind("mouseup");
 				}
-				$zimg.one("mouseleave", endDrag);
+				$(document).one("mouseup", endDrag);
 				$zimg.one("mouseup", endDrag);
 			});
 /*
@@ -132,9 +139,11 @@
 /*
  *			the aim is to keep the view centered on the same location in the original image
  */
-				self.vCenter.x *=$img.width()/$view.width();
-				self.vCenter.y *= $img.height()/$view.height(); 
-				self.update();
+				if (self.ready) {
+					self.vCenter.x *=$img.width()/$view.width();
+					self.vCenter.y *= $img.height()/$view.height(); 
+					self.update();
+				}
 			});
 		},
 /*
@@ -171,48 +180,75 @@
 			}
 			switch(key) {
 				case 'zoom':
-					var self = this;
-					var $img = $(this.img);
-					$img.load( function() {
-						self.update();
-					});
+					if (this.ready) {
+						this.update();
+					}
 					break;
 			}
+		},
+		
+		addElem: function(elem) {
+			$(this.view).append(elem);
 		},
 /*
  *	Test if a relative image coordinate is visible in the current view
  */
 		isVisible: function(relx, rely) {
 			var view = this.getView();
-			return (relx >= view.left && relx <= view.right && rely >= view.top && rely <= view.bottom);
+			if (view) {
+				return (relx >= view.left && relx <= view.right && rely >= view.top && rely <= view.bottom);
+			} else {
+				return false;
+			}
 		},
 /*
  *	Get relative image coordinates of current view
  */
 		getView: function() {
-			var $img = $(this.img),
-				width = $img.width(),
-				height = $img.height(),
-				zoom = this.options.zoom;
-			return {
+			if (this.ready) {
+				var $img = $(this.img),
+					width = $img.width(),
+					height = $img.height(),
+					zoom = this.options.zoom;
+				return {
 					top: this.vCenter.y/height - 0.5/zoom,
 					left: this.vCenter.x/width - 0.5/zoom,
 					bottom: this.vCenter.y/height + 0.5/zoom,
 					right: this.vCenter.x/width + 0.5/zoom
-			};
+				};
+			} else {
+				return null;
+			}
 		},
 /*
  *	Pan the view to be centred at the given relative image location
  */
 		panTo: function(relx, rely) {
-			if ( relx >= 0 && relx <= 1 && rely >= 0 && rely <=1 ) {
+			if ( this.ready && relx >= 0 && relx <= 1 && rely >= 0 && rely <=1 ) {
 				var $img = $(this.img),
 					width = $img.width(),
 					height = $img.height();
 				this.vCenter.x = relx * width;
 				this.vCenter.y = rely * height;
 				this.update();
-				return { relx: this.vCenter.x/width, rely: this.vCenter.y/height };
+				return { x: this.vCenter.x/width, y: this.vCenter.y/height };
+			} else {
+				return null;
+			}
+		},
+/*
+ *	Convert a relative image location to a viewport pixel location
+ */  
+		imgToView: function(relx, rely) {
+			if ( this.ready && relx >= 0 && relx <= 1 && rely >= 0 && rely <=1 ) {
+				var $img = $(this.img),
+					width = $img.width(),
+					height = $img.height();
+				var zLeft = width/2 - this.vCenter.x * this.options.zoom;
+				var zTop =  height/2 - this.vCenter.y * this.options.zoom;
+				var vx = relx * width * this.options.zoom + zLeft;
+				var vy = rely * height * this.options.zoom + zTop;
+				return { x: Math.round(vx), y: Math.round(vy) };
 			} else {
 				return null;
 			}
@@ -221,34 +257,56 @@
  *	Convert a relative image location to a page pixel location
  */  
 		imgToCursor: function(relx, rely) {
-			if ( relx >= 0 && relx <= 1 && rely >= 0 && rely <=1 ) {
+			var pos = this.imgToView(relx, rely);
+			if (pos) {
+				var offset = $(this.img).offset();
+				pos.x += offset.left + this.offsetBorder.x + this.offsetPadding.left;
+				pos.y += offset.top + this.offsetBorder.y + this.offsetPadding.top;
+				return pos;
+			} else {
+				return null;
+			}
+		},
+/*
+ *	Convert a viewport pixel location to a relative image coordinate
+ */		
+		viewToImg: function(vx, vy) {
+			if (this.ready) {
+				var $img = $(this.img),
+					width = $img.width(),
+					height = $img.height();
+				var zLeft = width/2 - this.vCenter.x * this.options.zoom;
+				var zTop =  height/2 - this.vCenter.y * this.options.zoom;
+				var relx= (vx - zLeft)/(width * this.options.zoom);
+				var rely = (vy - zTop)/(height * this.options.zoom);
+				if (relx>=0 && relx<=1 && rely>=0 && rely<=1) {
+					return {x: relx, y: rely};
+				} else {
+					return null;
+				}
+			} else {
+				return null;
+			}
+		},
+		
+/*
+ *	Convert a page pixel location to a relative image coordinate
+ */		
+		cursorToImg: function(cx, cy) {
+			if (this.ready) {
 				var $img = $(this.img),
 					width = $img.width(),
 					height = $img.height(),
 					offset = $img.offset();
 				var zLeft = width/2 - this.vCenter.x * this.options.zoom;
 				var zTop =  height/2 - this.vCenter.y * this.options.zoom;
-				var x = relx * width * this.options.zoom + offset.left + this.offsetPadding.left + this.offsetBorder.x + zLeft;
-				var y = rely * height * this.options.zoom + offset.top + this.offsetPadding.top + this.offsetBorder.y + zTop;
-				return { pageX: Math.round(x), pageY: Math.round(y) };
-			} else {
-				return null;
-			}
-		},
-/*
- *	Convert a page pixel location to a relative image coordinate
- */		
-		cursorToImg: function(pageX, pageY) {
-			var $img = $(this.img),
-				width = $img.width(),
-				height = $img.height(),
-				offset = $img.offset();
-			var zLeft = width/2 - this.vCenter.x * this.options.zoom;
-			var zTop =  height/2 - this.vCenter.y * this.options.zoom;
-			var x = (pageX - offset.left - this.offsetPadding.left - this.offsetBorder.x - zLeft)/(width * this.options.zoom);
-			var y = (pageY - offset.top  - this.offsetPadding.top - this.offsetBorder.y - zTop)/(height * this.options.zoom);
-			if (x>=0 && x<=1 && y>=0 && y<=1) {
-				return {relx: x, rely: y};
+				var relx = (cx - offset.left - this.offsetBorder.x - this.offsetPadding.left- zLeft)/(width * this.options.zoom);
+				var rely = (cy - offset.top - this.offsetBorder.y - this.offsetPadding.top - zTop)/(height * this.options.zoom);
+				if (relx>=0 && relx<=1 && rely>=0 && rely<=1) {
+					return {x: relx, y: rely};
+				} else {
+					return null;
+				}
 			} else {
 				return null;
 			}
@@ -257,67 +315,69 @@
  *	Adjust the display of the image  
  */
 		update: function() {
-			var zTop, zLeft, zWidth, zHeight,
-				$img = $(this.img),
-				width = $img.width(),
-				height = $img.height(),
-				offset = $img.offset(),
-				zoom = this.options.zoom,
-				half_width = width/2,
-				half_height = height/2;
+			if (this.ready) {
+				var zTop, zLeft, zWidth, zHeight,
+					$img = $(this.img),
+					width = $img.width(),
+					height = $img.height(),
+					offset = $img.offset(),
+					zoom = this.options.zoom,
+					half_width = width/2,
+					half_height = height/2;
   
-			if (zoom <= 1) {
-				zTop = 0;
-				zLeft = 0;
-				zWidth = width;
-				zHeight = height;
-				this.vCenter = { 
+				if (zoom <= 1) {
+					zTop = 0;
+					zLeft = 0;
+					zWidth = width;
+					zHeight = height;
+					this.vCenter = { 
 									x: half_width,
 									y: half_height
-				};
-				this.options.zoom = 1;
-			} else {
-				zTop = Math.round(half_height - this.vCenter.y * zoom);
-				zLeft = Math.round(half_width - this.vCenter.x * zoom);
-				zWidth = Math.round(width * zoom);
-				zHeight = Math.round(height * zoom);
+					};
+					this.options.zoom = 1;
+				} else {
+					zTop = Math.round(half_height - this.vCenter.y * zoom);
+					zLeft = Math.round(half_width - this.vCenter.x * zoom);
+					zWidth = Math.round(width * zoom);
+					zHeight = Math.round(height * zoom);
 /*
  *			adjust the view center so the image edges snap to the edge of the view
  */
-				if (zLeft > 0) {
-					this.vCenter.x = half_width/zoom;
-					zLeft = 0;
-				} else if (zLeft+zWidth < width) {
-					this.vCenter.x = width - half_width/zoom ;
-					zLeft = width - zWidth;
+					if (zLeft > 0) {
+						this.vCenter.x = half_width/zoom;
+						zLeft = 0;
+					} else if (zLeft+zWidth < width) {
+						this.vCenter.x = width - half_width/zoom ;
+						zLeft = width - zWidth;
+					}
+					if (zTop > 0) {
+						this.vCenter.y = half_height/zoom;
+						zTop = 0;
+					} else if (zTop + zHeight < height) {
+						this.vCenter.y = height - half_height/zoom;
+						zTop = height - zHeight;
+					}
 				}
-				if (zTop > 0) {
-					this.vCenter.y = half_height/zoom;
-					zTop = 0;
-				} else if (zTop + zHeight < height) {
-					this.vCenter.y = height - half_height/zoom;
-					zTop = height - zHeight;
-				}
-			}
-			var vTop = Math.round(offset.top + this.offsetBorder.y + this.offsetPadding.top),
-				vLeft = Math.round(offset.left + this.offsetBorder.x + this.offsetPadding.left);
-			$(this.view).css({
+				var vTop = Math.round(offset.top + this.offsetBorder.y + this.offsetPadding.top),
+					vLeft = Math.round(offset.left + this.offsetBorder.x + this.offsetPadding.left);
+				$(this.view).css({
 								top: vTop+"px",
 								left: vLeft+"px",
 								width: width+"px",
 								height: height+"px"
-			});
-			$(this.zimg).css({
+				});
+				$(this.zimg).css({
 								left: zLeft+"px",
 								top: zTop+"px",
 								width: zWidth+"px",
 								height: zHeight+"px"
-			});
+				});
 /*
  *		define the onUpdate option to do something after the image is redisplayed
  *		probably shouldn't pass out the this object - need to think of something better
  */
-			this._trigger("onUpdate", null, this);
+				this._trigger("onUpdate", null, this);
+			}
 		}
 	});
 })(jQuery);
