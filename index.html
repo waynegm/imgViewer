@@ -45,12 +45,12 @@
 		$("#image1").imgViewer({
 			onClick: function( e, self ) {
 				var pos = self.cursorToImg( e.pageX, e.pageY);
-				$("#position").html(e.pageX + " " + e.pageY + " " + pos.relx + " " + pos.rely);
+				$("#position").html(e.pageX + " " + e.pageY + " " + pos.x + " " + pos.y);
 			}
 		});
 		function test(e, self) {
 				var pos = self.cursorToImg( e.pageX, e.pageY);
-				$("#position2").html(e.pageX + " " + e.pageY + " " + pos.relx + " " + pos.rely);
+				$("#position2").html(e.pageX + " " + e.pageY + " " + pos.x + " " + pos.y);
 		}
 		var img = $("#image2").imgViewer();
 		img.imgViewer("option", "onClick", test);
