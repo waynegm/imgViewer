@@ -16,7 +16,7 @@
 	equal(tst.imgViewer("option", "zoom"), zoom, "set zoom option on built object");
 	tst.imgViewer("option", "zoom", 0.5);
 	equal(tst.imgViewer("option", "zoom"), zoom, "no change if zoom is less than 1");
-	
+	tst.remove();
 	});
 
 test( "zoomStep option", 3, function() {
@@ -31,7 +31,7 @@ test( "zoomStep option", 3, function() {
 	equal(tst.imgViewer("option", "zoomStep"), step, "set zoomStep option on built object");
 	tst.imgViewer("option", "zoomStep", -0.2);
 	equal(tst.imgViewer("option", "zoomStep"), step, "no change if zoomStep is less than 0");
-	
+	tst.remove();
 });
 	
 }(jQuery));
