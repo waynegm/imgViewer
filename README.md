@@ -24,7 +24,7 @@ Include either the development version or minified production version of the JS 
 	<script src="jquery.js"></script>
 	<script src="jquery-ui.js"></script>
 	<script src="jquery.mousewheel.js"></script>
-	<script src="jquery.imgViewer.min.js"></script>
+	<script src="imgViewer.min.js"></script>
 	...
 </head>
 ```
@@ -76,7 +76,7 @@ $("#image1").imgViewer("option", "zoom", 3);
 ```javascript
 $("#image1").imgViewer("option", "onClick", function(e, self) {
 	var pos = self.cursorToImg( e.pageX, e.pageY);
-	$("#click_position").html(e.pageX + " " + e.pageY + " " + pos.relx + " " + pos.rely);
+	$("#click_position").html(e.pageX + " " + e.pageY + " " + pos.x + " " + pos.y);
 });
 ```
 
@@ -107,8 +107,8 @@ $("#image1").imgViewer("option", "onUpdate", function(e, self) {
 	* pageY: y coordiante in pixel(page) coordinates
   * Returns javascript object with relative image coordinates (relative image coordinates range from 0 to 1
    where 0,0 correspondes to the topleft corner and 1,1 the bottom right):
-	* { relx: relative x image coordinate, rely: relative y image coordinate }
-  * If the page coordinate is outside the image viewport an empty object is returned
+	* { x: relative x image coordinate, y: relative y image coordinate }
+  * Returns null if the page coordinate is outside the image viewport.
 
 ###getView
   * Get the relative image coordinates of the current view
@@ -125,9 +125,27 @@ $("#image1").imgViewer("option", "onUpdate", function(e, self) {
 	* relx: relative x image coordinate
 	* rely: relative y image coordinate
   * Returns a javascript object with the page pixel coordinates:
-	* { pageX: the x page pixel coordinate, pageY: the y page pixel coordinate }
-  * If the relative image coordinates are not >=0 and <=1 an empty object is returned.
+	* { x: the x page pixel coordinate, y: the y page pixel coordinate }
+  * Returns null if the relative image coordinates are not >=0 and <=1.
 
+###imgToView
+  * Convert relative image coordinate to a viewport pixel location, ie pixel in the zoomed image
+  * Arguments:
+	* relx: relative x image coordinate
+	* rely: relative y image coordinate
+  * Returns a javascript object with the viewport pixel coordinates:
+	* { x: the x viewport pixel coordinate, y: the y viewport pixel coordinate }
+  * Returns null if the relative image coordinates are not >=0 and <=1.
+
+###viewToImg
+  * Convert a viewport pixel location to a relative image coordinate
+  * Arguments:
+    * viewX: x coordinate in viewport pixels
+    * viewY: y coordinate in viewport pixels
+  * Returns a javascript object with the relative image coordinates:
+	* { x: relative x image coordinate, y: relative y image coordinate }
+  * Returns null if the viewport pixel location is outside the zoomed image.
+    
 ###isVisible
   * Test is a given relative image coordinate is within the bounds of the current view
   * Arguments:
@@ -142,8 +160,8 @@ $("#image1").imgViewer("option", "onUpdate", function(e, self) {
 	* relx: relative x image coordinate
 	* rely: relative y image coordinate
   * Returns a javascript object with the relative image coordinates of the view centre after snapping the edges of the zoomed image to the view boundaries.
-	* { relx: view center relative x image coordinate, rely: view center relative y image coordinate }
-  * If the relative image coordinates are not >=0 and <=1 the view is not changed. 
+	* { x: view center relative x image coordinate, y: view center relative y image coordinate }
+  * Returns null if the relative image coordinates are not >=0 and <=1 and the view is not changed. 
 	
 ## License
 
@@ -156,5 +174,5 @@ Proof of concept - everything seems to work as I want but unit tests are needed 
 may need refinement to increase it's flexibility and usefulness.
 ### 0.6
 Major refactoring of the code to make it work in IE8. Instead of manipulating a background image a new image element 
-with the same src as the original image is positioned over it. Added the panTo, getView and isVisible public methods. Added
- unit tests for most of the code.
+with the same src as the original image is positioned over it. Added the panTo, getView, isVisible, imgtoView and viewToImg public methods. 
+Added unit tests to cover most of the code.
