@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>jQuery imgViewer - CUstom Click Callback</title>
+		
+		<link rel="stylesheet" href="../stylesheets/stylesheet.css" media="screen"/>
+		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" media="screen">
+		<script type="text/javascript" src="../libs/jquery/jquery.js"></script>
+		<script type="text/javascript" src="../libs/jquery/jquery-ui.js"></script>
+		<script type="text/javascript" src="../libs/jquery.mousewheel.min.js"></script>
+		<script type="text/javascript" src="../libs/imgViewer.min.js"></script>
+		
+	</head>
+	<body>
+		<div class="wrapper">
+			<header>
+				<h1 class="title">jQuery imgViewer</h1>
+			</header>
+			<div id="container">
+				<p class="tagline">Custom Click Callback Example</p>
+				<div id="main" role="main" style="padding-bottom: 20px;">
+					<div class="download-bar">
+						<div class="inner">
+							<a href="https://github.com/waynegm/imgViewer/tarball/master" class="download-button tar"><span>Download</span></a>
+							<a href="https://github.com/waynegm/imgViewer/zipball/master" class="download-button zip"><span>Download</span></a>
+							<a href="https://github.com/waynegm/imgViewer" class="code">View imgViewer on GitHub</a>
+						</div>
+						<span class="blc"></span><span class="trc"></span>
+					</div>
+					<article class="markdown-body">
+						<p>
+						This example demonstrates the widget with a custom "onClick" callback. In this case clicking on the image will show both the 
+						page pixel coordinates and relative image coordinates (relative image coordinates range from 0,0 to 1,1 where 0,0 is the top-left
+						corner and 1,1 is the bottom-right corner of the image). Zoom in and out using the mousewheel. Left mouseclick and drag to pan. Resize the window.
+						</p>
+					</article>
+				</div>
+			</div>
+		</div>
+		<br/>
+		<div align="center">
+			<img  id="image" src="https://raw.github.com/waynegm/imgViewer/master/image/test_image.jpg" style="border: 30px solid #555; padding:20px;" width="80%" />
+		</div>
+<script type="text/javascript">
+;(function($) {
+	$(document).ready(function() {
+		var $img = $("#image").imgViewer({
+								onClick: function( e, self ) {
+												var pos = self.cursorToImg( e.pageX, e.pageY);
+												var $message = $("<div id='dialog-modal'></div>").dialog({
+																		modal: true,
+																		title: "You clicked at:"
+																});
+												$message.html("Page X: " + e.pageX + "<br/>Page Y: " + e.pageY + "<br/>Image X: " + pos.x.toFixed(3) + "<br/>Image Y: " + pos.y.toFixed(3));
+								}
+					});
+	});
+})(jQuery);
+</script>
+</body>
+</html>
