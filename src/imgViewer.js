@@ -5,6 +5,63 @@
  * Copyright (c) 2013 Wayne Mogg
  * Licensed under the MIT license.
  */
+
+/*
+ *	Add a tap and drag gesture to toe.js
+ */
+;(function ($, touch, window, undefined) {
+	
+	var namespace = 'drag', 
+		cfg = {
+			distance: 40 // minimum
+		},
+		started;
+ 
+	touch.track(namespace, {
+		touchstart: function (event, state, start) {
+			started = false;
+			state[namespace] = {
+				finger: start.point.length,
+				start: start,
+				deltaX: 0,
+				deltaY: 0
+			};
+		},
+		touchmove: function (event, state, move) {
+			var opt = $.extend(cfg, event.data);
+		 
+			// if another finger was used then increment the amount of fingers used
+			state[namespace].finger = move.point.length > state[namespace].finger ? move.point.length : state[namespace].finger;
+		 
+			var distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
+			if (Math.abs(1 - distance) > opt.distance) {
+				if (!started) {
+					$(event.target).trigger($.Event('dragstart', state[namespace]));
+					started = true;
+				}
+				state[namespace].deltaX = (move.point[0].x - state.start.point[0].x);
+				state[namespace].deltaY = (move.point[0].y - state.start.point[0].y);
+				$(event.target).trigger($.Event('drag', state[namespace]));
+			}
+		},
+		touchend: function (event, state, end) {
+			if (started) {
+				started = false;
+			 
+				var distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
+				if (distance > cfg.distance) {
+					state[namespace].deltaX = (end.point[0].x - state.start.point[0].x);
+					state[namespace].deltaY = (end.point[0].y - state.start.point[0].y);
+					$(event.target).trigger($.Event('dragend', state[namespace]));
+				}
+			}
+		}
+	});
+}(jQuery, jQuery.toe, this));
+
+/*
+ *	imgViewer plugin starts here
+ */ 
 ;(function($) {
 	$.widget("wgm.imgViewer", {
 		options: {
@@ -80,7 +137,8 @@
 								top: 0+"px",
 								left: 0+"px",
 								width: width+"px",
-								height: height+"px"
+								height: height+"px",
+								"-webkit-tap-highlight-color": "transparent"
 					});
 //			the initial view is centered at the orignal image
 					self.vCenter = {
@@ -92,18 +150,98 @@
 				if (this.complete) { $(this).load(); }
 			});
 /*
- *		Mousewheel event handler for image zooming
- */					
-			$zimg.mousewheel(function(event, delta) {
-				event.preventDefault();
+ *			Render loop code during dragging and scaling using requestAnimationFrame
+ */
+			self.render = false;
+			function startRenderLoop() {
+				if (!self.render) {
+					self.render = true;
+					doRender();
+				}
+			}
+			
+			function stopRenderLoop() {
+				self.render = false;
+			}
+			
+			function doRender() {
+				if (self.render) {
+					window.requestAnimationFrame(doRender);
+					self.update();
+				}
+			}	
+/*
+ *		Touch event handlers
+ */
+			$zimg.on('touchstart touchmove touchend', function(ev) {
+				ev.preventDefault();
+			});
+			
+			$zimg.on( "tap" , function(ev) {
+				if (!self.dragging) {
+					ev.preventDefault();
+					self._trigger("onClick", ev, self);
+				}
+			});
+			$zimg.on( "transformstart" , function(ev) {
+				ev.preventDefault();
+				self.pinchzoom = self.options.zoom;
+				startRenderLoop();
+			});
+			$zimg.on("transform", function(ev) {
+				ev.preventDefault();
+				self.options.zoom = self.pinchzoom * ev.scale;
+			});
+			$zimg.on("transformend", function(ev) {
+				ev.preventDefault();
+				self.options.zoom = self.pinchzoom * ev.scale;
+				stopRenderLoop();
+			});
+			
+			$zimg.on( "dragstart" , function(ev) {
+				ev.preventDefault();
+				self.dragging = true;
+				self.dragXorg = self.vCenter.x;
+				self.dragYorg = self.vCenter.y;
+				startRenderLoop();
+			});
+			$zimg.on( "drag", function(ev) {
+				ev.preventDefault();
+				self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
+				self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
+			});
+			
+			$zimg.on( "dragend", function(ev) {
+				ev.preventDefault();
+				self.dragging = false;
+				self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
+				self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
+				stopRenderLoop();
+			});
+
+/*
+ *		Mouse event handlers
+ */
+			function MouseWheelHandler(ev) {
+				ev.preventDefault();
+				var e = ev.originalEvent;	
+				var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 				self.options.zoom -= delta * self.options.zoomStep;
 				self.update();
+			}
+			$zimg.on("mousewheel", MouseWheelHandler);
+			$zimg.on("DOMMouseScroll", MouseWheelHandler);
+			$zimg.on("onmousewheel", MouseWheelHandler);
+			
+			$zimg.click(function(e) {
+				if (!self.dragging) {
+					self._trigger("onClick", e, self);
+				}
 			});
-/*
- *		Mouse drag handler for image panning
- */
+			
 			$zimg.mousedown( function(e) {
 				e.preventDefault();
+				startRenderLoop();
 				var last = e;
 				$zimg.mousemove( function(e) {
 					e.preventDefault();
@@ -111,10 +249,10 @@
 					self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
 					self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
 					last = e;
-					self.update();
 				});
 				function endDrag(e) {
 					e.preventDefault();
+					stopRenderLoop();
 					setTimeout(function() {	self.dragging = false; }, 0);
 					$zimg.unbind("mousemove");
 					$zimg.unbind("mouseup");
@@ -123,14 +261,7 @@
 				$(document).one("mouseup", endDrag);
 				$zimg.one("mouseup", endDrag);
 			});
-/*
- *		Mouse click handler - supply an action by defining the onClick option
- */
-			$zimg.click(function(e) {
-				if (!self.dragging) {
-					self._trigger("onClick", e, self);
-				}
-			});
+			
 /*
  *		Window resize handler
  */
@@ -152,7 +283,6 @@
 		destroy: function() {
 			var $zimg = $(this.zimg);
 			$zimg.unbind("click");
-			$zimg.unmousewheel();
 			$(window).unbind("resize");
 			$zimg.remove();
 			$(this.view).remove();
@@ -335,6 +465,7 @@
 									y: half_height
 					};
 					this.options.zoom = 1;
+					zoom = 1;
 				} else {
 					zTop = Math.round(half_height - this.vCenter.y * zoom);
 					zLeft = Math.round(half_width - this.vCenter.x * zoom);
@@ -367,11 +498,13 @@
 								height: height+"px"
 				});
 				$(this.zimg).css({
-								left: zLeft+"px",
-								top: zTop+"px",
-								width: zWidth+"px",
-								height: zHeight+"px"
+								width: width+"px",
+								height: height+"px"
 				});
+
+				var xt = -(this.vCenter.x - half_width)*zoom;
+				var yt = -(this.vCenter.y - half_height)*zoom;
+				$(this.zimg).css({transform: "translate(" + xt + "px," + yt + "px) scale(" + zoom + "," + zoom + ")" });
 /*
  *		define the onUpdate option to do something after the image is redisplayed
  *		probably shouldn't pass out the this object - need to think of something better

@@ -2,7 +2,7 @@
   "name": "imgViewer",
   "title": "jQuery imgViewer",
   "description": "jQuery plugin to zoom and pan images, even those with a size that is a percentage of their container.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "homepage": "",
   "author": {
     "name": "Wayne Mogg"
@@ -22,7 +22,8 @@
   "dependencies": {
     "jquery": ">=1.8",
     "jquery-ui": ">=1.8",
-    "jQuery Mousewheel":  ">=3.0"
+    "toe.js":  ">=3.0",
+    "zoetrope": ">=3.0"
   },
   "keywords": [
       "jQuery",

@@ -1,9 +1,7 @@
 imgViewer
 =========
 
-imgViewer is a jQuery plugin that adds to an image the ability to zoom in and out with the mousewheel 
-and pan around by click and drag. A unique feature of this plugin is it's ability to work on images 
-which have widths or heights specified as a percentage of their container. Try out the [demo](http://waynegm.github.io/imgViewer/)
+imgViewer is a jQuery plugin that allows an image to be zoomed and panned. Zooming and panning works on desktop browsers using the mousewheel to zoom in and out left mouse button click and drag to  pan around. On touch enabled devices pinch gestures can be used to zoom in and out and tap and drag to pan around. A unique feature of this plugin is it's ability to work on images which have widths or heights specified as a percentage of their container. Try out the [demo](http://waynegm.github.io/imgViewer/)
 
 ## Dependencies
 The plugin is known to work with the configuration described below:
@@ -11,7 +9,8 @@ The plugin is known to work with the configuration described below:
  * [jQuery](http://jquery.com/) (>=1.8)
  * [jQuery UI](http://jqueryui.com/) (>=1.8)
     * [Widget Factory](http://api.jqueryui.com/jQuery.widget/)
- * [jQuery Mousewheel](http://brandonaaron.net/code/mousewheel/docs) (>=3.0)
+ * [toe.js](https://github.com/visiongeist/toe.js) (>=3.0)
+ * [Zoetrope](https://github.com/benplum/Zoetrope) (>=3.0)
 
 ## Usage
 
@@ -23,7 +22,8 @@ Include either the development version or minified production version of the JS 
 	...
 	<script src="jquery.js"></script>
 	<script src="jquery-ui.js"></script>
-	<script src="jquery.mousewheel.js"></script>
+	<script src="jquery.fs.zoetrope.min.js"></script>
+	<script src="toe.min.js"></script>
 	<script src="imgViewer.min.js"></script>
 	...
 </head>
@@ -176,3 +176,9 @@ may need refinement to increase it's flexibility and usefulness.
 Major refactoring of the code to make it work in IE8. Instead of manipulating a background image a new image element 
 with the same src as the original image is positioned over it. Added the panTo, getView, isVisible, imgtoView and viewToImg public methods. 
 Added unit tests to cover most of the code.
+### 0.7
+Added support for pinch and drag touch gestures for mobile device support (adds requirement for toe.js).
+Added dependency on the requestAnimationFrame polyfill provided by Zoetrope for more responsive image scaling anddragging.
+Changed to using css transform to scale and translate image for better performance on mobile platforms.
+Minimum IE supported is now IE 9 - stick with version 0.6 if you need IE 8 support.
+Updated Grunfile.js to include tests against latest version (2.1.0) of jQuery.
