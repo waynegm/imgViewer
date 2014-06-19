@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.7.0 - 2014-05-17
+/*! jQuery imgViewer - v0.7.0 - 2014-06-19
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2014 Wayne Mogg; Licensed MIT */
 /*
@@ -62,6 +62,7 @@
 		options: {
 			zoomStep: 0.1,
 			zoom: 1,
+			zoomable: true,
 			onClick: null,
 			onUpdate: null
 		},
@@ -179,50 +180,64 @@
 				}
 			});
 			$zimg.on( "transformstart" , function(ev) {
-				ev.preventDefault();
-				self.pinchzoom = self.options.zoom;
-				startRenderLoop();
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					self.pinchzoom = self.options.zoom;
+					startRenderLoop();
+				}
 			});
 			$zimg.on("transform", function(ev) {
-				ev.preventDefault();
-				self.options.zoom = self.pinchzoom * ev.scale;
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					self.options.zoom = self.pinchzoom * ev.scale;
+				}
 			});
 			$zimg.on("transformend", function(ev) {
-				ev.preventDefault();
-				self.options.zoom = self.pinchzoom * ev.scale;
-				stopRenderLoop();
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					self.options.zoom = self.pinchzoom * ev.scale;
+					stopRenderLoop();
+				}
 			});
 			
 			$zimg.on( "dragstart" , function(ev) {
-				ev.preventDefault();
-				self.dragging = true;
-				self.dragXorg = self.vCenter.x;
-				self.dragYorg = self.vCenter.y;
-				startRenderLoop();
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					self.dragging = true;
+					self.dragXorg = self.vCenter.x;
+					self.dragYorg = self.vCenter.y;
+					startRenderLoop();
+				}
 			});
 			$zimg.on( "drag", function(ev) {
-				ev.preventDefault();
-				self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
-				self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
+					self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
+				}
 			});
 			
 			$zimg.on( "dragend", function(ev) {
-				ev.preventDefault();
-				self.dragging = false;
-				self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
-				self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
-				stopRenderLoop();
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					self.dragging = false;
+					self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
+					self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
+					stopRenderLoop();
+				}
 			});
 
 /*
  *		Mouse event handlers
  */
 			function MouseWheelHandler(ev) {
-				ev.preventDefault();
-				var e = ev.originalEvent;	
-				var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
-				self.options.zoom -= delta * self.options.zoomStep;
-				self.update();
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					var e = ev.originalEvent;	
+					var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+					self.options.zoom -= delta * self.options.zoomStep;
+					self.update();
+				}
 			}
 			$zimg.on("mousewheel", MouseWheelHandler);
 			$zimg.on("DOMMouseScroll", MouseWheelHandler);
@@ -235,16 +250,6 @@
 			});
 			
 			$zimg.mousedown( function(e) {
-				e.preventDefault();
-				startRenderLoop();
-				var last = e;
-				$zimg.mousemove( function(e) {
-					e.preventDefault();
-					self.dragging = true;
-					self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
-					self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
-					last = e;
-				});
 				function endDrag(e) {
 					e.preventDefault();
 					stopRenderLoop();
@@ -253,8 +258,20 @@
 					$zimg.unbind("mouseup");
 					$(document).unbind("mouseup");
 				}
-				$(document).one("mouseup", endDrag);
-				$zimg.one("mouseup", endDrag);
+				if (self.options.zoomable) {
+					e.preventDefault();
+					startRenderLoop();
+					var last = e;
+					$zimg.mousemove( function(e) {
+						e.preventDefault();
+						self.dragging = true;
+						self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
+						self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
+						last = e;
+					});
+					$(document).one("mouseup", endDrag);
+					$zimg.one("mouseup", endDrag);
+				}
 			});
 			
 /*

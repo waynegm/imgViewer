@@ -63,6 +63,14 @@ $("#image1").imgViewer("option", "zoomStep", 0.05);
 ```javascript
 $("#image1").imgViewer("option", "zoom", 3);
 ```
+###zoomable
+  * Controls if image will be zoomable
+  * Default: true
+  * Example - to disble image zooming:
+
+```javascript
+$("#image1").imgViewer("option", "zoomable", false);
+```
 
 ###onClick
   * Callback triggered by a mouseclick on the image
@@ -182,3 +190,5 @@ Added dependency on the requestAnimationFrame polyfill provided by Zoetrope for 
 Changed to using css transform to scale and translate image for better performance on mobile platforms.
 Minimum IE supported is now IE 9 - stick with version 0.6 if you need IE 8 support.
 Updated Grunfile.js to include tests against latest version (2.1.0) of jQuery.
+### 0.71
+Add zoomable option allowing user to disable zooming
