@@ -202,6 +202,7 @@
 					ev.preventDefault();
 					self.options.zoom = self.pinchzoom * ev.scale;
 					stopRenderLoop();
+					self.update();
 				}
 			});
 			
@@ -229,6 +230,7 @@
 					self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
 					self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
 					stopRenderLoop();
+					self.update();
 				}
 			});
 

@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.7.0 - 2014-06-19
+/*! jQuery imgViewer - v0.7.1 - 2014-06-22
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2014 Wayne Mogg; Licensed MIT */
 /*
@@ -197,6 +197,7 @@
 					ev.preventDefault();
 					self.options.zoom = self.pinchzoom * ev.scale;
 					stopRenderLoop();
+					self.update();
 				}
 			});
 			
@@ -224,6 +225,7 @@
 					self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
 					self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
 					stopRenderLoop();
+					self.update();
 				}
 			});
 

@@ -192,3 +192,4 @@ Minimum IE supported is now IE 9 - stick with version 0.6 if you need IE 8 suppo
 Updated Grunfile.js to include tests against latest version (2.1.0) of jQuery.
 ### 0.71
 Add zoomable option allowing user to disable zooming
+Fix bug in drag implementation on mobile devices
