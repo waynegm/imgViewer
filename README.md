@@ -11,6 +11,7 @@ The plugin is known to work with the configuration described below:
     * [Widget Factory](http://api.jqueryui.com/jQuery.widget/)
  * [toe.js](https://github.com/visiongeist/toe.js) (>=3.0)
  * [Zoetrope](https://github.com/benplum/Zoetrope) (>=3.0)
+ * [jquery-mousewheel](https://github.com/brandonaaron/jquery-mousewheel) (>=3.0)
 
 ## Usage
 
@@ -24,6 +25,7 @@ Include either the development version or minified production version of the JS 
 	<script src="jquery-ui.js"></script>
 	<script src="jquery.fs.zoetrope.min.js"></script>
 	<script src="toe.min.js"></script>
+	<script src="jquery.mousewheel.min.js"></script>
 	<script src="imgViewer.min.js"></script>
 	...
 </head>
@@ -193,3 +195,6 @@ Updated Grunfile.js to include tests against latest version (2.1.0) of jQuery.
 ### 0.71
 Add zoomable option allowing user to disable zooming
 Fix bug in drag implementation on mobile devices
+### 0.7.2
+Add dependency on jquery-mousewheel
+Stop IE 10 & 11 continuously dragging image

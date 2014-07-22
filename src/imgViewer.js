@@ -9,6 +9,7 @@
 /*
  *	Add a tap and drag gesture to toe.js
  */
+
 ;(function ($, touch, window, undefined) {
 	
 	var namespace = 'drag', 
@@ -174,6 +175,7 @@
 /*
  *		Touch event handlers
  */
+
 			$zimg.on('touchstart touchmove touchend', function(ev) {
 				ev.preventDefault();
 			});
@@ -205,34 +207,6 @@
 					self.update();
 				}
 			});
-			
-			$zimg.on( "dragstart" , function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					self.dragging = true;
-					self.dragXorg = self.vCenter.x;
-					self.dragYorg = self.vCenter.y;
-					startRenderLoop();
-				}
-			});
-			$zimg.on( "drag", function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
-					self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
-				}
-			});
-			
-			$zimg.on( "dragend", function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					self.dragging = false;
-					self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
-					self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
-					stopRenderLoop();
-					self.update();
-				}
-			});
 
 /*
  *		Mouse event handlers
@@ -240,46 +214,80 @@
 			function MouseWheelHandler(ev) {
 				if (self.options.zoomable) {
 					ev.preventDefault();
-					var e = ev.originalEvent;	
-					var delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+					var delta = ev.deltaY ;
 					self.options.zoom -= delta * self.options.zoomStep;
 					self.update();
 				}
 			}
 			$zimg.on("mousewheel", MouseWheelHandler);
-			$zimg.on("DOMMouseScroll", MouseWheelHandler);
-			$zimg.on("onmousewheel", MouseWheelHandler);
 			
-			$zimg.click(function(e) {
+			$zimg.on("click", function(e) {
+				e.preventDefault();
 				if (!self.dragging) {
 					self._trigger("onClick", e, self);
 				}
 			});
 			
-			$zimg.mousedown( function(e) {
-				function endDrag(e) {
-					e.preventDefault();
-					stopRenderLoop();
-					setTimeout(function() {	self.dragging = false; }, 0);
-					$zimg.unbind("mousemove");
-					$zimg.unbind("mouseup");
-					$(document).unbind("mouseup");
-				}
-				if (self.options.zoomable) {
-					e.preventDefault();
-					startRenderLoop();
-					var last = e;
-					$zimg.mousemove( function(e) {
+			if (window.navigator.msPointerEnabled) {
+				$zimg.on("mousedown", function(e) {
+					function endDrag(e) {
+						setTimeout(function() {	self.dragging = false; }, 0);
 						e.preventDefault();
-						self.dragging = true;
-						self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
-						self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
-						last = e;
-					});
-					$(document).one("mouseup", endDrag);
-					$zimg.one("mouseup", endDrag);
-				}
-			});
+						stopRenderLoop();
+						$zimg.off("mousemove");
+						$zimg.off("mouseup");
+						$(document).off("mouseup");
+					}
+					if (self.options.zoomable) {
+						$(document).one("mouseup", endDrag);
+						$zimg.one("mouseup", endDrag);
+						e.preventDefault();
+						startRenderLoop();
+						var last = e;
+						$zimg.on("mousemove", function(e) {
+							e.preventDefault();
+							self.dragging = true;
+							self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
+							self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
+							last = e;
+						});
+					}
+				});
+			} else {
+				$zimg.on("mousedown dragstart", function(e) {
+					function endDrag(e) {
+						setTimeout(function() {	self.dragging = false; }, 0);
+						e.preventDefault();
+						stopRenderLoop();
+						$zimg.off("mousemove drag");
+						$zimg.off("mouseup dragend");
+						$(document).off("mouseup dragend");
+					}
+					if (self.options.zoomable) {
+						$(document).one("mouseup dragend", endDrag);
+						$zimg.one("mouseup dragend", endDrag);
+						e.preventDefault();
+						if (e.type === "dragstart" ) {
+							self.dragXorg = self.vCenter.x;
+							self.dragYorg = self.vCenter.y;
+						}
+						startRenderLoop();
+						var last = e;
+						$zimg.on("mousemove drag", function(e) {
+							e.preventDefault();
+							self.dragging = true;
+							if (e.type === "drag") {
+								self.vCenter.x = self.dragXorg - e.deltaX/self.options.zoom;
+								self.vCenter.y = self.dragYorg - e.deltaY/self.options.zoom;
+							} else {
+								self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
+								self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
+								last = e;
+							}
+						});
+					}
+				});
+			}
 			
 /*
  *		Window resize handler
