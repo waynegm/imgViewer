@@ -180,21 +180,25 @@ Copyright (c) 2013 Wayne Mogg.
 
 ## Release History
 ### 0.5
-Proof of concept - everything seems to work as I want but unit tests are needed and the exposed interface 
-may need refinement to increase it's flexibility and usefulness.
+- Proof of concept - everything seems to work as I want but unit tests are needed and the exposed interface may need refinement to increase it's flexibility and usefulness.
+
 ### 0.6
-Major refactoring of the code to make it work in IE8. Instead of manipulating a background image a new image element 
-with the same src as the original image is positioned over it. Added the panTo, getView, isVisible, imgtoView and viewToImg public methods. 
-Added unit tests to cover most of the code.
+- Major refactoring of the code to make it work in IE8.
+- Instead of manipulating a background image a new image element with the same src as the original image is positioned over it.
+- Added the panTo, getView, isVisible, imgtoView and viewToImg public methods.
+- Added unit tests to cover most of the code.
+
 ### 0.7
-Added support for pinch and drag touch gestures for mobile device support (adds requirement for toe.js).
-Added dependency on the requestAnimationFrame polyfill provided by Zoetrope for more responsive image scaling anddragging.
-Changed to using css transform to scale and translate image for better performance on mobile platforms.
-Minimum IE supported is now IE 9 - stick with version 0.6 if you need IE 8 support.
-Updated Grunfile.js to include tests against latest version (2.1.0) of jQuery.
-### 0.71
-Add zoomable option allowing user to disable zooming
-Fix bug in drag implementation on mobile devices
+- Added support for pinch and drag touch gestures for mobile device support (adds requirement for toe.js).
+- Added dependency on the requestAnimationFrame polyfill provided by Zoetrope for more responsive image scaling and dragging.
+- Changed to using css transform to scale and translate image for better performance on mobile platforms.
+- Minimum IE supported is now IE 9 - stick with version 0.6 if you need IE 8 support.
+- Updated Grunfile.js to include tests against latest version (2.1.0) of jQuery.
+
+### 0.7.1
+- Add zoomable option allowing user to disable zooming
+- Fix bug in drag implementation on mobile devices
+
 ### 0.7.2
-Add dependency on jquery-mousewheel
-Stop IE 10 & 11 continuously dragging image
+- Add dependency on jquery-mousewheel
+- Stop IE 10 & 11 continuously dragging image
