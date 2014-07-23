@@ -180,12 +180,6 @@
 				ev.preventDefault();
 			});
 			
-			$zimg.on( "tap" , function(ev) {
-				if (!self.dragging) {
-					ev.preventDefault();
-					self._trigger("onClick", ev, self);
-				}
-			});
 			$zimg.on( "transformstart" , function(ev) {
 				if (self.options.zoomable) {
 					ev.preventDefault();
@@ -221,14 +215,14 @@
 			}
 			$zimg.on("mousewheel", MouseWheelHandler);
 			
-			$zimg.on("click", function(e) {
-				e.preventDefault();
-				if (!self.dragging) {
-					self._trigger("onClick", e, self);
-				}
-			});
 			
 			if (window.navigator.msPointerEnabled) {
+				$zimg.on("click", function(e) {
+					e.preventDefault();
+					if (!self.dragging) {
+						self._trigger("onClick", e, self);
+					}
+				});
 				$zimg.on("mousedown", function(e) {
 					function endDrag(e) {
 						setTimeout(function() {	self.dragging = false; }, 0);
@@ -254,6 +248,12 @@
 					}
 				});
 			} else {
+				$zimg.on("click tap", function(e) {
+					e.preventDefault();
+					if (!self.dragging) {
+						self._trigger("onClick", e, self);
+					}
+				});
 				$zimg.on("mousedown dragstart", function(e) {
 					function endDrag(e) {
 						setTimeout(function() {	self.dragging = false; }, 0);
