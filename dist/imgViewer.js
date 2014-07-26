@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.7.2 - 2014-07-23
+/*! jQuery imgViewer - v0.7.2 - 2014-07-26
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2014 Wayne Mogg; Licensed MIT */
 /*
@@ -168,37 +168,7 @@
 				}
 			}	
 /*
- *		Touch event handlers
- */
-
-			$zimg.on('touchstart touchmove touchend', function(ev) {
-				ev.preventDefault();
-			});
-			
-			$zimg.on( "transformstart" , function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					self.pinchzoom = self.options.zoom;
-					startRenderLoop();
-				}
-			});
-			$zimg.on("transform", function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					self.options.zoom = self.pinchzoom * ev.scale;
-				}
-			});
-			$zimg.on("transformend", function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					self.options.zoom = self.pinchzoom * ev.scale;
-					stopRenderLoop();
-					self.update();
-				}
-			});
-
-/*
- *		Mouse event handlers
+ *		Event handlers
  */
 			function MouseWheelHandler(ev) {
 				if (self.options.zoomable) {
@@ -243,43 +213,86 @@
 					}
 				});
 			} else {
+				$zimg.on('touchstart touchmove touchend', function(ev) {
+					ev.preventDefault();
+				});
+			
+				$zimg.on( "transformstart" , function(ev) {
+					if (self.options.zoomable) {
+						ev.preventDefault();
+						self.pinchzoom = self.options.zoom;
+						startRenderLoop();
+					}
+				});
+				$zimg.on("transform", function(ev) {
+					if (self.options.zoomable) {
+						ev.preventDefault();
+						self.options.zoom = self.pinchzoom * ev.scale;
+					}
+				});
+				$zimg.on("transformend", function(ev) {
+					if (self.options.zoomable) {
+						ev.preventDefault();
+						self.options.zoom = self.pinchzoom * ev.scale;
+						stopRenderLoop();
+						self.update();
+					}
+				});
+				$zimg.on( "dragstart" , function(ev) {
+					if (self.options.zoomable) {
+						ev.preventDefault();
+						self.dragging = true;
+						self.dragXorg = self.vCenter.x;
+						self.dragYorg = self.vCenter.y;
+						startRenderLoop();
+					}
+				});
+				$zimg.on( "drag", function(ev) {
+					if (self.options.zoomable) {
+						ev.preventDefault();
+						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
+						self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
+					}
+				});
+				
+				$zimg.on( "dragend", function(ev) {
+					if (self.options.zoomable) {
+						ev.preventDefault();
+						self.dragging = false;
+						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
+						self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
+						stopRenderLoop();
+						self.update();
+					}
+				});
 				$zimg.on("click tap", function(e) {
 					e.preventDefault();
 					if (!self.dragging) {
 						self._trigger("onClick", e, self);
 					}
 				});
-				$zimg.on("mousedown dragstart", function(e) {
+				$zimg.on("mousedown", function(e) {
 					function endDrag(e) {
 						setTimeout(function() {	self.dragging = false; }, 0);
 						e.preventDefault();
 						stopRenderLoop();
-						$zimg.off("mousemove drag");
-						$zimg.off("mouseup dragend");
-						$(document).off("mouseup dragend");
+						$zimg.off("mousemove");
+						$zimg.off("mouseup");
+						$(document).off("mouseup");
 					}
 					if (self.options.zoomable) {
-						$(document).one("mouseup dragend", endDrag);
-						$zimg.one("mouseup dragend", endDrag);
 						e.preventDefault();
-						if (e.type === "dragstart" ) {
-							self.dragXorg = self.vCenter.x;
-							self.dragYorg = self.vCenter.y;
-						}
 						startRenderLoop();
 						var last = e;
-						$zimg.on("mousemove drag", function(e) {
+						$zimg.on("mousemove", function(e) {
 							e.preventDefault();
 							self.dragging = true;
-							if (e.type === "drag") {
-								self.vCenter.x = self.dragXorg - e.deltaX/self.options.zoom;
-								self.vCenter.y = self.dragYorg - e.deltaY/self.options.zoom;
-							} else {
-								self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
-								self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
-								last = e;
-							}
+							self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
+							self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
+							last = e;
 						});
+						$(document).one("mouseup", endDrag);
+						$zimg.one("mouseup", endDrag);
 					}
 				});
 			}
@@ -395,13 +408,15 @@
 			if ( this.ready && relx >= 0 && relx <= 1 && rely >= 0 && rely <=1 ) {
 				var $img = $(this.img),
 					width = $img.width(),
-					height = $img.height();
+					height = $img.height();						
+			 
 				var zLeft = width/2 - this.vCenter.x * this.options.zoom;
 				var zTop =  height/2 - this.vCenter.y * this.options.zoom;
 				var vx = relx * width * this.options.zoom + zLeft;
 				var vy = rely * height * this.options.zoom + zTop;
 				return { x: Math.round(vx), y: Math.round(vy) };
-			} else {
+			} else {						
+				
 				return null;
 			}
 		},
