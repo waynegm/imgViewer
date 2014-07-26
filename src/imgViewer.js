@@ -270,7 +270,7 @@
 						self.update();
 					}
 				});
-				$zimg.on("click tap", function(e) {
+				$zimg.on("tap click", function(e) {
 					e.preventDefault();
 					if (!self.dragging) {
 						self._trigger("onClick", e, self);
