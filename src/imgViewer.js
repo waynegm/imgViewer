@@ -270,12 +270,21 @@
 						self.update();
 					}
 				});
-				$zimg.on("tap click", function(e) {
-					e.preventDefault();
-					if (!self.dragging) {
-						self._trigger("onClick", e, self);
-					}
-				});
+				if ($.mobile !==undefined) {
+					$zimg.on("vclick", function(e) {
+						e.preventDefault();
+						if (!self.dragging) {
+							self._trigger("onClick", e, self);
+						}
+					});
+				} else {
+					$zimg.on("tap click", function(e) {
+						e.preventDefault();
+						if (!self.dragging) {
+							self._trigger("onClick", e, self);
+						}
+					});
+				}
 				$zimg.on("mousedown", function(e) {
 					function endDrag(e) {
 						setTimeout(function() {	self.dragging = false; }, 0);

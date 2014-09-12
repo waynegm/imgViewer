@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.7.2 - 2014-07-26
+/*! jQuery imgViewer - v0.7.2 - 2014-09-12
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2014 Wayne Mogg; Licensed MIT */
 /*
@@ -265,12 +265,21 @@
 						self.update();
 					}
 				});
-				$zimg.on("tap click", function(e) {
-					e.preventDefault();
-					if (!self.dragging) {
-						self._trigger("onClick", e, self);
-					}
-				});
+				if ($.mobile !==undefined) {
+					$zimg.on("vclick", function(e) {
+						e.preventDefault();
+						if (!self.dragging) {
+							self._trigger("onClick", e, self);
+						}
+					});
+				} else {
+					$zimg.on("tap click", function(e) {
+						e.preventDefault();
+						if (!self.dragging) {
+							self._trigger("onClick", e, self);
+						}
+					});
+				}
 				$zimg.on("mousedown", function(e) {
 					function endDrag(e) {
 						setTimeout(function() {	self.dragging = false; }, 0);

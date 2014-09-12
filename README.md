@@ -202,3 +202,4 @@ Copyright (c) 2013 Wayne Mogg.
 ### 0.7.2
 - Add dependency on jquery-mousewheel
 - Stop IE 10 & 11 continuously dragging image
+- Fix multiple click/tap events when using jQuery Mobile
