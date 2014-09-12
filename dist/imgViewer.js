@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.7.2 - 2014-09-12
+/*! jQuery imgViewer - v0.7.3 - 2014-09-12
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2014 Wayne Mogg; Licensed MIT */
 /*
