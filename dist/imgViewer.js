@@ -1,6 +1,6 @@
-/*! jQuery imgViewer - v0.7.3 - 2014-09-12
+/*! jQuery imgViewer - v0.7.3 - 2015-03-12
 * https://github.com/waynegm/imgViewer
-* Copyright (c) 2014 Wayne Mogg; Licensed MIT */
+* Copyright (c) 2015 Wayne Mogg; Licensed MIT */
 /*
  *	Add a tap and drag gesture to toe.js
  */
