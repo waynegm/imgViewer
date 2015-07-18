@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.7.3 - 2015-03-12
+/*! jQuery imgViewer - v0.7.4 - 2015-07-18
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2015 Wayne Mogg; Licensed MIT */
 /*
@@ -9,40 +9,42 @@
 	
 	var namespace = 'drag', 
 		cfg = {
-			distance: 40 // minimum
-		},
-		started;
+			distance: 120 // minimum
+		};
+		var isDragging = false;
  
 	touch.track(namespace, {
 		touchstart: function (event, state, start) {
-			started = false;
 			state[namespace] = {
-				finger: start.point.length,
 				start: start,
+				finger: start.point.length,
 				deltaX: 0,
 				deltaY: 0
 			};
+			isDragging = false;
 		},
 		touchmove: function (event, state, move) {
 			var opt = $.extend(cfg, event.data);
-		 
-			// if another finger was used then increment the amount of fingers used
-			state[namespace].finger = move.point.length > state[namespace].finger ? move.point.length : state[namespace].finger;
-		 
+			if (move.point.length !== 1) {
+				return;
+			}
 			var distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
 			if (Math.abs(1 - distance) > opt.distance) {
-				if (!started) {
-					$(event.target).trigger($.Event('dragstart', state[namespace]));
-					started = true;
-				}
 				state[namespace].deltaX = (move.point[0].x - state.start.point[0].x);
 				state[namespace].deltaY = (move.point[0].y - state.start.point[0].y);
+				if (!isDragging) {
+					$(event.target).trigger($.Event('dragstart', state[namespace]));
+					isDragging = true;
+				}
 				$(event.target).trigger($.Event('drag', state[namespace]));
 			}
 		},
 		touchend: function (event, state, end) {
-			if (started) {
-				started = false;
+			if (end.point.length !== 1) {
+				return;
+			}
+			if (isDragging) {
+				isDragging = false;
 			 
 				var distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
 				if (distance > cfg.distance) {
@@ -89,6 +91,7 @@
 			self.vCenter = {};
 //		a flag used to decide if a mouse click is part of a drag or a proper click
 			self.dragging = false;
+			self.pinch = false;
 //		a flag used to check the target image has loaded
 			self.ready = false;
 			$img.one("load",function() {
@@ -216,11 +219,17 @@
 				$zimg.on('touchstart touchmove touchend', function(ev) {
 					ev.preventDefault();
 				});
-			
 				$zimg.on( "transformstart" , function(ev) {
 					if (self.options.zoomable) {
 						ev.preventDefault();
+						self.pinch = true;
+						self.dragging = false;
 						self.pinchzoom = self.options.zoom;
+						self.pinchcenter = { x: self.vCenter.x, y: self.vCenter.y};
+						self.pinchstart = { x: (ev.start.point[0].x+ev.start.point[1].x)/2, 
+											y: (ev.start.point[0].y+ev.start.point[1].y)/2
+						};
+						self.pinchstartrelpos = self.cursorToImg(self.pinchstart.x, self.pinchstart.y);
 						startRenderLoop();
 					}
 				});
@@ -228,18 +237,25 @@
 					if (self.options.zoomable) {
 						ev.preventDefault();
 						self.options.zoom = self.pinchzoom * ev.scale;
+						var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
+						self.vCenter.x = self.pinchcenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
+						self.vCenter.y = self.pinchcenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
 					}
 				});
 				$zimg.on("transformend", function(ev) {
 					if (self.options.zoomable) {
 						ev.preventDefault();
 						self.options.zoom = self.pinchzoom * ev.scale;
+						var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
+						self.vCenter.x = self.pinchcenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
+						self.vCenter.y = self.pinchcenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
 						stopRenderLoop();
 						self.update();
+						self.pinch = false;
 					}
 				});
 				$zimg.on( "dragstart" , function(ev) {
-					if (self.options.zoomable) {
+					if (self.options.zoomable && !self.pinch) {
 						ev.preventDefault();
 						self.dragging = true;
 						self.dragXorg = self.vCenter.x;
@@ -247,8 +263,9 @@
 						startRenderLoop();
 					}
 				});
+
 				$zimg.on( "drag", function(ev) {
-					if (self.options.zoomable) {
+					if (self.options.zoomable && self.dragging) {
 						ev.preventDefault();
 						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
 						self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
@@ -256,7 +273,7 @@
 				});
 				
 				$zimg.on( "dragend", function(ev) {
-					if (self.options.zoomable) {
+					if (self.options.zoomable && self.dragging) {
 						ev.preventDefault();
 						self.dragging = false;
 						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;

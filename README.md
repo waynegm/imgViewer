@@ -205,3 +205,8 @@ Copyright (c) 2013 Wayne Mogg.
 
 ### 0.7.3
 - Fix multiple click/tap events when using jQuery Mobile
+
+### 0.7.4
+- Fix for triggering of drag events during pinch gestures
+
+
