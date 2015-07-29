@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.7.4 - 2015-07-18
+/*! jQuery imgViewer - v0.7.4 - 2015-07-29
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2015 Wayne Mogg; Licensed MIT */
 /*
@@ -7,52 +7,54 @@
 
 ;(function ($, touch, window, undefined) {
 	
-	var namespace = 'drag', 
+	var timer,
+		namespace = 'drag', 
 		cfg = {
-			distance: 120 // minimum
+			distance: 150, // minimum
+			duration: 200,
+			finger: 1
 		};
 		var isDragging = false;
  
 	touch.track(namespace, {
 		touchstart: function (event, state, start) {
+			var opt = $.extend(cfg, event.data);
 			state[namespace] = {
 				start: start,
 				finger: start.point.length,
 				deltaX: 0,
 				deltaY: 0
 			};
-			isDragging = false;
+			clearTimeout(timer);
+			timer = setTimeout(function() {
+				if (!isDragging && touch.active && state[namespace].finger ===1) {
+						isDragging = true;
+                       $(event.target).trigger($.Event('dragstart', state[namespace]));
+				}
+			}, opt.duration);
 		},
 		touchmove: function (event, state, move) {
 			var opt = $.extend(cfg, event.data);
-			if (move.point.length !== 1) {
-				return;
-			}
+			state[namespace].finger = move.point.length;
 			var distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
-			if (Math.abs(1 - distance) > opt.distance) {
+			if (isDragging && distance > opt.distance && move.point.length === 1) {
 				state[namespace].deltaX = (move.point[0].x - state.start.point[0].x);
 				state[namespace].deltaY = (move.point[0].y - state.start.point[0].y);
-				if (!isDragging) {
-					$(event.target).trigger($.Event('dragstart', state[namespace]));
-					isDragging = true;
-				}
+//				$(event.target).trigger($.Event('dragstart', state[namespace]));
 				$(event.target).trigger($.Event('drag', state[namespace]));
 			}
 		},
 		touchend: function (event, state, end) {
-			if (end.point.length !== 1) {
-				return;
+			clearTimeout(timer);
+			state[namespace].finger = end.point.length;
+		 
+			var distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
+			if (isDragging && distance > cfg.distance && end.point.length === 1) {
+				state[namespace].deltaX = (end.point[0].x - state.start.point[0].x);
+				state[namespace].deltaY = (end.point[0].y - state.start.point[0].y);
+				$(event.target).trigger($.Event('dragend', state[namespace]));
 			}
-			if (isDragging) {
-				isDragging = false;
-			 
-				var distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
-				if (distance > cfg.distance) {
-					state[namespace].deltaX = (end.point[0].x - state.start.point[0].x);
-					state[namespace].deltaY = (end.point[0].y - state.start.point[0].y);
-					$(event.target).trigger($.Event('dragend', state[namespace]));
-				}
-			}
+			isDragging = false;
 		}
 	});
 }(jQuery, jQuery.toe, this));
@@ -220,6 +222,7 @@
 					ev.preventDefault();
 				});
 				$zimg.on( "transformstart" , function(ev) {
+//					console.log("transform-start");
 					if (self.options.zoomable) {
 						ev.preventDefault();
 						self.pinch = true;
@@ -234,21 +237,23 @@
 					}
 				});
 				$zimg.on("transform", function(ev) {
+//					console.log("transform");
 					if (self.options.zoomable) {
 						ev.preventDefault();
 						self.options.zoom = self.pinchzoom * ev.scale;
 						var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
-						self.vCenter.x = self.pinchcenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
-						self.vCenter.y = self.pinchcenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
+						self.vCenter.x = self.vCenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
+						self.vCenter.y = self.vCenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
 					}
 				});
 				$zimg.on("transformend", function(ev) {
+//					console.log("transform-end");
 					if (self.options.zoomable) {
 						ev.preventDefault();
 						self.options.zoom = self.pinchzoom * ev.scale;
 						var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
-						self.vCenter.x = self.pinchcenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
-						self.vCenter.y = self.pinchcenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
+						self.vCenter.x = self.vCenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
+						self.vCenter.y = self.vCenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
 						stopRenderLoop();
 						self.update();
 						self.pinch = false;
@@ -256,6 +261,7 @@
 				});
 				$zimg.on( "dragstart" , function(ev) {
 					if (self.options.zoomable && !self.pinch) {
+//					console.log("drag-start");
 						ev.preventDefault();
 						self.dragging = true;
 						self.dragXorg = self.vCenter.x;
@@ -266,6 +272,7 @@
 
 				$zimg.on( "drag", function(ev) {
 					if (self.options.zoomable && self.dragging) {
+//					console.log("drag");
 						ev.preventDefault();
 						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
 						self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
@@ -274,6 +281,7 @@
 				
 				$zimg.on( "dragend", function(ev) {
 					if (self.options.zoomable && self.dragging) {
+//					console.log("drag-end");
 						ev.preventDefault();
 						self.dragging = false;
 						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
