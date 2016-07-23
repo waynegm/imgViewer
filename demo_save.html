@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>JQuery Image Viewer Plugin Demo</title>
+		
+		<script type="text/javascript" src="libs/jquery/jquery.js"></script>
+		<script type="text/javascript" src="libs/jquery/jquery-ui.js"></script>
+		<script type="text/javascript" src="libs/jquery.fs.zoetrope.min.js"></script>
+		<script type="text/javascript" src="libs/toe.min.js"></script>
+		<script type="text/javascript" src="libs/jquery.mousewheel.min.js"></script>
+		<script type="text/javascript" src="libs/html2canvas.js"></script>
+		<script type="text/javascript" src="src/imgViewer.js"></script>
+	</head>
+	<body>
+			<h1>JQuery Image Viewer Plugin Demo</h1>
+			
+			<h2>Centred in a div - Dynamic Width</h2>
+				<div id="imgdiv" align="center">
+					<img  id="image1" src="image/test_image.jpg" width="70%" />
+					<br/>
+					<button id="saveView">Save View</button>
+				</div>
+<script type="text/javascript">
+;(function($) {
+		var $img = $("#image1").imgViewer();
+		var $save = $("#saveView");
+		$save.on("click", function() {
+										html2canvas($('.viewport'),{
+											onrendered: function(canvas) {
+												var imgURL = canvas.toDataURL();
+												var newPage = window.open();
+												var newImg = newPage.document.createElement("img");
+												newImg.src = imgURL;
+												newPage.document.body.appendChild(newImg);
+											}
+										});
+		});
+		
+})(jQuery);
+</script>
+		</body>
+</html>
