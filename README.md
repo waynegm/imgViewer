@@ -9,7 +9,7 @@ The plugin is known to work with the configuration described below:
  * [jQuery](http://jquery.com/) (>=1.8)
  * [jQuery UI](http://jqueryui.com/) (>=1.8)
     * [Widget Factory](http://api.jqueryui.com/jQuery.widget/)
- * [toe.js](https://github.com/visiongeist/toe.js) (>=3.0)
+ * [jquery.event.ue.js](https://github.com/mmikowski/jquery.event.ue) (>=0.43)
  * [Zoetrope](https://github.com/benplum/Zoetrope) (>=3.0)
  * [jquery-mousewheel](https://github.com/brandonaaron/jquery-mousewheel) (>=3.0)
 
@@ -24,7 +24,7 @@ Include either the development version or minified production version of the JS 
 	<script src="jquery.js"></script>
 	<script src="jquery-ui.js"></script>
 	<script src="jquery.fs.zoetrope.min.js"></script>
-	<script src="toe.min.js"></script>
+	<script src="jquery.event.ue.js"></script>
 	<script src="jquery.mousewheel.min.js"></script>
 	<script src="imgViewer.min.js"></script>
 	...
@@ -179,14 +179,22 @@ This plugin is provided under the [MIT License](http://opensource.org/licenses/M
 Copyright (c) 2013 Wayne Mogg.
 
 ## Release History
-### 0.5
-- Proof of concept - everything seems to work as I want but unit tests are needed and the exposed interface may need refinement to increase it's flexibility and usefulness.
+### 0.8.0
+- Replace toe.js with jquery.event.ue for better touch gesture support
 
-### 0.6
-- Major refactoring of the code to make it work in IE8.
-- Instead of manipulating a background image a new image element with the same src as the original image is positioned over it.
-- Added the panTo, getView, isVisible, imgtoView and viewToImg public methods.
-- Added unit tests to cover most of the code.
+### 0.7.4
+- Fix for triggering of drag events during pinch gestures
+
+### 0.7.3
+- Fix multiple click/tap events when using jQuery Mobile
+
+### 0.7.2
+- Add dependency on jquery-mousewheel
+- Stop IE 10 & 11 continuously dragging image
+
+### 0.7.1
+- Add zoomable option allowing user to disable zooming
+- Fix bug in drag implementation on mobile devices
 
 ### 0.7
 - Added support for pinch and drag touch gestures for mobile device support (adds requirement for toe.js).
@@ -195,18 +203,15 @@ Copyright (c) 2013 Wayne Mogg.
 - Minimum IE supported is now IE 9 - stick with version 0.6 if you need IE 8 support.
 - Updated Grunfile.js to include tests against latest version (2.1.0) of jQuery.
 
-### 0.7.1
-- Add zoomable option allowing user to disable zooming
-- Fix bug in drag implementation on mobile devices
+### 0.6
+- Major refactoring of the code to make it work in IE8.
+- Instead of manipulating a background image a new image element with the same src as the original image is positioned over it.
+- Added the panTo, getView, isVisible, imgtoView and viewToImg public methods.
+- Added unit tests to cover most of the code.
 
-### 0.7.2
-- Add dependency on jquery-mousewheel
-- Stop IE 10 & 11 continuously dragging image
+### 0.5
+- Proof of concept - everything seems to work as I want but unit tests are needed and the exposed interface may need refinement to increase it's flexibility and usefulness.
 
-### 0.7.3
-- Fix multiple click/tap events when using jQuery Mobile
 
-### 0.7.4
-- Fix for triggering of drag events during pinch gestures
 
 

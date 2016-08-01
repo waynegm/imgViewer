@@ -1,64 +1,6 @@
-/*! jQuery imgViewer - v0.7.4 - 2015-07-29
+/*! jQuery imgViewer - v0.8.0 - 2016-08-01
 * https://github.com/waynegm/imgViewer
-* Copyright (c) 2015 Wayne Mogg; Licensed MIT */
-/*
- *	Add a tap and drag gesture to toe.js
- */
-
-;(function ($, touch, window, undefined) {
-	
-	var timer,
-		namespace = 'drag', 
-		cfg = {
-			distance: 150, // minimum
-			duration: 200,
-			finger: 1
-		};
-		var isDragging = false;
- 
-	touch.track(namespace, {
-		touchstart: function (event, state, start) {
-			var opt = $.extend(cfg, event.data);
-			state[namespace] = {
-				start: start,
-				finger: start.point.length,
-				deltaX: 0,
-				deltaY: 0
-			};
-			clearTimeout(timer);
-			timer = setTimeout(function() {
-				if (!isDragging && touch.active && state[namespace].finger ===1) {
-						isDragging = true;
-                       $(event.target).trigger($.Event('dragstart', state[namespace]));
-				}
-			}, opt.duration);
-		},
-		touchmove: function (event, state, move) {
-			var opt = $.extend(cfg, event.data);
-			state[namespace].finger = move.point.length;
-			var distance = touch.calc.getDistance(state.start.point[0], move.point[0]);
-			if (isDragging && distance > opt.distance && move.point.length === 1) {
-				state[namespace].deltaX = (move.point[0].x - state.start.point[0].x);
-				state[namespace].deltaY = (move.point[0].y - state.start.point[0].y);
-//				$(event.target).trigger($.Event('dragstart', state[namespace]));
-				$(event.target).trigger($.Event('drag', state[namespace]));
-			}
-		},
-		touchend: function (event, state, end) {
-			clearTimeout(timer);
-			state[namespace].finger = end.point.length;
-		 
-			var distance = touch.calc.getDistance(state.start.point[0], end.point[0]);
-			if (isDragging && distance > cfg.distance && end.point.length === 1) {
-				state[namespace].deltaX = (end.point[0].x - state.start.point[0].x);
-				state[namespace].deltaY = (end.point[0].y - state.start.point[0].y);
-				$(event.target).trigger($.Event('dragend', state[namespace]));
-			}
-			isDragging = false;
-		}
-	});
-}(jQuery, jQuery.toe, this));
-
+* Copyright (c) 2016 Wayne Mogg; Licensed MIT */
 /*
  *	imgViewer plugin starts here
  */ 
@@ -185,151 +127,74 @@
 			}
 			$zimg.on("mousewheel", MouseWheelHandler);
 			
+			$zimg.on( "udragstart" , function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					self.dragXorg = self.vCenter.x;
+					self.dragYorg = self.vCenter.y;
+					startRenderLoop();
+				}
+			});
+
+			$zimg.on( "udragmove", function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					self.vCenter.x = self.dragXorg + ev.px_tdelta_x/self.options.zoom;
+					self.vCenter.y = self.dragYorg + ev.px_tdelta_y/self.options.zoom;
+				}
+			});
+				
+			$zimg.on( "udragend", function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					stopRenderLoop();
+					self.update();
+				}
+			});
+
+			$zimg.on("uzoomstart", function() {
+			});
 			
-			if (window.navigator.msPointerEnabled) {
-				$zimg.on("click", function(e) {
-					e.preventDefault();
-					if (!self.dragging) {
-						self._trigger("onClick", e, self);
-					}
-				});
-				$zimg.on("mousedown", function(e) {
-					function endDrag(e) {
-						setTimeout(function() {	self.dragging = false; }, 0);
-						e.preventDefault();
-						stopRenderLoop();
-						$zimg.off("mousemove");
-						$zimg.off("mouseup");
-						$(document).off("mouseup");
-					}
-					if (self.options.zoomable) {
-						$(document).one("mouseup", endDrag);
-						$zimg.one("mouseup", endDrag);
-						e.preventDefault();
-						startRenderLoop();
-						var last = e;
-						$zimg.on("mousemove", function(e) {
-							e.preventDefault();
-							self.dragging = true;
-							self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
-							self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
-							last = e;
-						});
-					}
-				});
-			} else {
-				$zimg.on('touchstart touchmove touchend', function(ev) {
+			$zimg.on("uzoommove", function(ev) {
+				if (self.options.zoomable) {
 					ev.preventDefault();
-				});
-				$zimg.on( "transformstart" , function(ev) {
-//					console.log("transform-start");
-					if (self.options.zoomable) {
-						ev.preventDefault();
-						self.pinch = true;
-						self.dragging = false;
-						self.pinchzoom = self.options.zoom;
-						self.pinchcenter = { x: self.vCenter.x, y: self.vCenter.y};
-						self.pinchstart = { x: (ev.start.point[0].x+ev.start.point[1].x)/2, 
-											y: (ev.start.point[0].y+ev.start.point[1].y)/2
-						};
+					if (!self.pinch) {
+						if ('px_center_x' in ev) {
+							self.pinchstart = { x: ev.px_center_x + window.scrollX, y: ev.px_center_y + window.scrollY};
+						} else {
+							self.pinchstart = { x: ev.px_current_x + window.scrollX, y: ev.px_current_y + window.scrollY};
+						}
 						self.pinchstartrelpos = self.cursorToImg(self.pinchstart.x, self.pinchstart.y);
 						startRenderLoop();
-					}
-				});
-				$zimg.on("transform", function(ev) {
-//					console.log("transform");
-					if (self.options.zoomable) {
-						ev.preventDefault();
-						self.options.zoom = self.pinchzoom * ev.scale;
+						self.pinch = true;
+					} else {
+						self.options.zoom += ev.px_delta_zoom/200 ;
 						var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
 						self.vCenter.x = self.vCenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
 						self.vCenter.y = self.vCenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
 					}
-				});
-				$zimg.on("transformend", function(ev) {
-//					console.log("transform-end");
-					if (self.options.zoomable) {
-						ev.preventDefault();
-						self.options.zoom = self.pinchzoom * ev.scale;
-						var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
-						self.vCenter.x = self.vCenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
-						self.vCenter.y = self.vCenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
+				}
+			});
+
+			$zimg.on("uzoomend", function(ev) {
+				if (self.options.zoomable) {
+					ev.preventDefault();
+					if (self.pinch) {
 						stopRenderLoop();
 						self.update();
 						self.pinch = false;
 					}
-				});
-				$zimg.on( "dragstart" , function(ev) {
-					if (self.options.zoomable && !self.pinch) {
-//					console.log("drag-start");
-						ev.preventDefault();
-						self.dragging = true;
-						self.dragXorg = self.vCenter.x;
-						self.dragYorg = self.vCenter.y;
-						startRenderLoop();
-					}
-				});
-
-				$zimg.on( "drag", function(ev) {
-					if (self.options.zoomable && self.dragging) {
-//					console.log("drag");
-						ev.preventDefault();
-						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
-						self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
-					}
-				});
-				
-				$zimg.on( "dragend", function(ev) {
-					if (self.options.zoomable && self.dragging) {
-//					console.log("drag-end");
-						ev.preventDefault();
-						self.dragging = false;
-						self.vCenter.x = self.dragXorg - ev.deltaX/self.options.zoom;
-						self.vCenter.y = self.dragYorg - ev.deltaY/self.options.zoom;
-						stopRenderLoop();
-						self.update();
-					}
-				});
-				if ($.mobile !==undefined) {
-					$zimg.on("vclick", function(e) {
-						e.preventDefault();
-						if (!self.dragging) {
-							self._trigger("onClick", e, self);
-						}
-					});
-				} else {
-					$zimg.on("tap click", function(e) {
-						e.preventDefault();
-						if (!self.dragging) {
-							self._trigger("onClick", e, self);
-						}
-					});
 				}
-				$zimg.on("mousedown", function(e) {
-					function endDrag(e) {
-						setTimeout(function() {	self.dragging = false; }, 0);
-						e.preventDefault();
-						stopRenderLoop();
-						$zimg.off("mousemove");
-						$zimg.off("mouseup");
-						$(document).off("mouseup");
-					}
-					if (self.options.zoomable) {
-						e.preventDefault();
-						startRenderLoop();
-						var last = e;
-						$zimg.on("mousemove", function(e) {
-							e.preventDefault();
-							self.dragging = true;
-							self.vCenter.x = self.vCenter.x - (e.pageX - last.pageX)/self.options.zoom;
-							self.vCenter.y = self.vCenter.y - (e.pageY - last.pageY)/self.options.zoom;
-							last = e;
-						});
-						$(document).one("mouseup", endDrag);
-						$zimg.one("mouseup", endDrag);
-					}
-				});
-			}
+			});
+
+			$zimg.on("utap", function(ev) {
+				ev.preventDefault();
+				if (!self.dragging) {
+					ev.pageX = ev.px_start_x + window.scrollX;
+					ev.pageY = ev.px_start_y + window.scrollY;
+					self._trigger("onClick", ev, self);
+				}
+			});
 			
 /*
  *		Window resize handler
