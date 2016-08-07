@@ -33,5 +33,32 @@ test( "zoomStep option", 3, function() {
 	equal(tst.imgViewer("option", "zoomStep"), step, "no change if zoomStep is less than 0");
 	tst.remove();
 });
+
+test( "zoomable option", 2, function() {
+	var $img = $("#qunit-fixture img");
+	var zoom = false;
+	var tst = $img.imgViewer({
+		zoomable: zoom
+	});
+	equal(tst.imgViewer("option", "zoomable"), zoom, "set zoomable option in constructor");
+	zoom = true;
+	tst.imgViewer("option", "zoomable", zoom);
+	equal(tst.imgViewer("option", "zoomable"), zoom, "set zoomable option on built object");
+	tst.remove();
+});
+	
+test( "dragable option", 2, function() {
+	var $img = $("#qunit-fixture img");
+	var drag = false;
+	var tst = $img.imgViewer({
+		dragable: drag
+	});
+	equal(tst.imgViewer("option", "dragable"), drag, "set dragable option in constructor");
+	drag = true;
+	tst.imgViewer("option", "dragable", drag);
+	equal(tst.imgViewer("option", "dragable"), drag, "set dragable option on built object");
+	tst.remove();
+});
+
 	
 }(jQuery));

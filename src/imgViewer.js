@@ -16,6 +16,7 @@
 			zoomStep: 0.1,
 			zoom: 1,
 			zoomable: true,
+			dragable: true,
 			onClick: null,
 			onUpdate: null
 		},
@@ -103,105 +104,25 @@
  *			Render loop code during dragging and scaling using requestAnimationFrame
  */
 			self.render = false;
-			function startRenderLoop() {
-				if (!self.render) {
-					self.render = true;
-					doRender();
-				}
-			}
-			
-			function stopRenderLoop() {
-				self.render = false;
-			}
-			
-			function doRender() {
-				if (self.render) {
-					window.requestAnimationFrame(doRender);
-					self.update();
-				}
-			}	
 /*
  *		Event handlers
  */
-			function MouseWheelHandler(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					var delta = ev.deltaY ;
-					self.options.zoom -= delta * self.options.zoomStep;
-					self.update();
-				}
+			$zimg.hammer();
+			
+			if (self.options.zoomable) {
+				self._bind_zoom_events();
 			}
-			$zimg.on("mousewheel", MouseWheelHandler);
-			
-			$zimg.on( "udragstart" , function(ev) {
-				ev.preventDefault();
-				if (!self.pinch) {
-					self.dragXorg = self.vCenter.x;
-					self.dragYorg = self.vCenter.y;
-					startRenderLoop();
-				}
-			});
-
-			$zimg.on( "udragmove", function(ev) {
-				ev.preventDefault();
-				if (!self.pinch) {
-					self.vCenter.x = self.dragXorg + ev.px_tdelta_x/self.options.zoom;
-					self.vCenter.y = self.dragYorg + ev.px_tdelta_y/self.options.zoom;
-				}
-			});
-				
-			$zimg.on( "udragend", function(ev) {
-				ev.preventDefault();
-				if (!self.pinch) {
-					stopRenderLoop();
-					self.update();
-				}
-			});
-
-			$zimg.on("uzoomstart", function() {
-			});
-			
-			$zimg.on("uzoommove", function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					if (!self.pinch) {
-						if ('px_center_x' in ev) {
-							self.pinchstart = { x: ev.px_center_x + window.scrollX, y: ev.px_center_y + window.scrollY};
-						} else {
-							self.pinchstart = { x: ev.px_current_x + window.scrollX, y: ev.px_current_y + window.scrollY};
-						}
-						self.pinchstartrelpos = self.cursorToImg(self.pinchstart.x, self.pinchstart.y);
-						startRenderLoop();
-						self.pinch = true;
-					} else {
-						self.options.zoom += ev.px_delta_zoom/200 ;
-						var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
-						self.vCenter.x = self.vCenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
-						self.vCenter.y = self.vCenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
-					}
-				}
-			});
-
-			$zimg.on("uzoomend", function(ev) {
-				if (self.options.zoomable) {
-					ev.preventDefault();
-					if (self.pinch) {
-						stopRenderLoop();
-						self.update();
-						self.pinch = false;
-					}
-				}
-			});
-
-			$zimg.on("utap", function(ev) {
+			if (self.options.dragable) {
+				self._bind_drag_events();
+			}
+			$zimg.on("tap", function(ev) {
 				ev.preventDefault();
 				if (!self.dragging) {
-					ev.pageX = ev.px_start_x + window.scrollX;
-					ev.pageY = ev.px_start_y + window.scrollY;
+					ev.pageX = ev.gesture.center.x + window.scrollX;
+					ev.pageY = ev.gesture.center.y + window.scrollY;
 					self._trigger("onClick", ev, self);
 				}
-			});
-			
+			});			
 /*
  *		Window resize handler
  */
@@ -217,6 +138,132 @@
 				}
 			});
 		},
+/*
+ *	Bind events
+ */
+		_bind_zoom_events: function() {
+			var self = this;
+			var $zimg = $(self.zimg);
+
+			function startRenderLoop() {
+				if (!self.render) {
+					self.render = true;
+					doRender();
+				}
+			}
+			function stopRenderLoop() {
+				self.render = false;
+			}
+			function doRender() {
+				if (self.render) {
+					window.requestAnimationFrame(doRender);
+					self.update();
+				}
+			}
+
+			$zimg.on("mousewheel", function(ev) {
+					ev.preventDefault();
+					var delta = ev.deltaY ;
+					self.options.zoom -= delta * self.options.zoomStep;
+					self.update();
+			});
+
+			$zimg.data("hammer").recognizers[1].options.enable = true;
+			
+			$zimg.on("pinchstart", function() {
+			});
+			
+			$zimg.on("pinch", function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					self.pinchstart = { x: ev.gesture.center.x + window.scrollX, y: ev.gesture.center.y + window.scrollY};
+					self.pinchstartrelpos = self.cursorToImg(self.pinchstart.x, self.pinchstart.y);
+					self.pinchstart_scale = self.options.zoom;
+					startRenderLoop();
+					self.pinch = true;
+				} else {
+					self.options.zoom = ev.gesture.scale *  self.pinchstart_scale;
+					var npos = self.imgToCursor( self.pinchstartrelpos.x, self.pinchstartrelpos.y);
+					self.vCenter.x = self.vCenter.x + (npos.x - self.pinchstart.x)/self.options.zoom;
+					self.vCenter.y = self.vCenter.y + (npos.y - self.pinchstart.y)/self.options.zoom;
+				}
+			});
+
+			$zimg.on("pinchend", function(ev) {
+				ev.preventDefault();
+				if (self.pinch) {
+					stopRenderLoop();
+					self.update();
+					self.pinch = false;
+				}
+			});
+		},
+		
+		_bind_drag_events: function() {
+			var self = this;
+			var $zimg = $(self.zimg);
+			function startRenderLoop() {
+				if (!self.render) {
+					self.render = true;
+					doRender();
+				}
+			}
+			function stopRenderLoop() {
+				self.render = false;
+			}
+			function doRender() {
+				if (self.render) {
+					window.requestAnimationFrame(doRender);
+					self.update();
+				}
+			}
+
+			$zimg.on( "panstart" , function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					self.dragXorg = self.vCenter.x;
+					self.dragYorg = self.vCenter.y;
+					startRenderLoop();
+				}
+			});
+
+			$zimg.on( "panmove", function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					self.vCenter.x = self.dragXorg - ev.gesture.deltaX/self.options.zoom;
+					self.vCenter.y = self.dragYorg - ev.gesture.deltaY/self.options.zoom;
+				}
+			});
+				
+			$zimg.on( "panend", function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					stopRenderLoop();
+					self.update();
+				}
+			});
+		},
+/*
+ *	Unbind events
+ */
+		_unbind_zoom_events: function() {
+			var self = this;
+			var $zimg = $(self.zimg);
+			$zimg.data("hammer").recognizers[1].options.enable = false;
+			$zimg.off("mousewheel");
+			$zimg.off("pinchstart");
+			$zimg.off("pinch");
+			$zimg.off("pinchend");
+		},	
+
+		_unbind_drag_events: function() {
+			var self = this;
+			var $zimg = $(self.zimg);
+			$zimg.off("panstart");
+			$zimg.off("panmove");
+			$zimg.off("panend");
+		},	
+
 /*
  *	Remove the plugin
  */  
@@ -252,6 +299,20 @@
 				case 'zoom':
 					if (this.ready) {
 						this.update();
+					}
+					break;
+				case 'zoomable':
+					if (this.options.zoomable) {
+						this._bind_zoom_events();
+					} else {
+						this._unbind_zoom_events();
+					}
+					break;
+				case 'dragable':
+					if (this.options.dragable) {
+						this._bind_drag_events();
+					} else {
+						this._unbind_drag_events();
 					}
 					break;
 			}

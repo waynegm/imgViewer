@@ -9,7 +9,8 @@ The plugin is known to work with the configuration described below:
  * [jQuery](http://jquery.com/) (>=1.8)
  * [jQuery UI](http://jqueryui.com/) (>=1.8)
     * [Widget Factory](http://api.jqueryui.com/jQuery.widget/)
- * [jquery.event.ue.js](https://github.com/mmikowski/jquery.event.ue) (>=0.43)
+ * [Hammer.js](http://hammerjs.github.io/) (>=2.08)
+ * [jquery.hammer.js](https://github.com/hammerjs/jquery.hammer.js) (>=2.0.0)
  * [Zoetrope](https://github.com/benplum/Zoetrope) (>=3.0)
  * [jquery-mousewheel](https://github.com/brandonaaron/jquery-mousewheel) (>=3.0)
 
@@ -24,7 +25,8 @@ Include either the development version or minified production version of the JS 
 	<script src="jquery.js"></script>
 	<script src="jquery-ui.js"></script>
 	<script src="jquery.fs.zoetrope.min.js"></script>
-	<script src="jquery.event.ue.js"></script>
+	<script src="hammer.min.js"></script>
+	<script src="jquery.hammer.js"></script>
 	<script src="jquery.mousewheel.min.js"></script>
 	<script src="imgViewer.min.js"></script>
 	...
@@ -47,6 +49,14 @@ Put an image element and a javascript block to attach the plugin to the image in
 </body>
 ```
 ## Options
+###dragable
+  * Controls if image will be dragable
+  * Default: true
+  * Example - to disable image dragging:
+
+```javascript
+$("#image1").imgViewer("option", "dragable", false);
+```
 
 ###zoomStep
   * How much the zoom changes for each mousewheel click - must be a positive number
@@ -68,7 +78,7 @@ $("#image1").imgViewer("option", "zoom", 3);
 ###zoomable
   * Controls if image will be zoomable
   * Default: true
-  * Example - to disble image zooming:
+  * Example - to disable image zooming:
 
 ```javascript
 $("#image1").imgViewer("option", "zoomable", false);
@@ -179,6 +189,10 @@ This plugin is provided under the [MIT License](http://opensource.org/licenses/M
 Copyright (c) 2013 Wayne Mogg.
 
 ## Release History
+### 0.9.0
+- Replace jquery.event.ue with hammer.js and jquery.hammer.js for more flexibility with touch gesture support
+- Add dragable option allowing user to disable dragging 
+
 ### 0.8.0
 - Replace toe.js with jquery.event.ue for better touch gesture support
 
