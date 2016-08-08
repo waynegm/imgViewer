@@ -9,7 +9,7 @@ The plugin is known to work with the configuration described below:
  * [jQuery](http://jquery.com/) (>=1.8)
  * [jQuery UI](http://jqueryui.com/) (>=1.8)
     * [Widget Factory](http://api.jqueryui.com/jQuery.widget/)
- * [Hammer.js](http://hammerjs.github.io/) (>=2.08)
+ * [Hammer.js](http://hammerjs.github.io/) (=2.01)
  * [jquery.hammer.js](https://github.com/hammerjs/jquery.hammer.js) (>=2.0.0)
  * [Zoetrope](https://github.com/benplum/Zoetrope) (>=3.0)
  * [jquery-mousewheel](https://github.com/brandonaaron/jquery-mousewheel) (>=3.0)

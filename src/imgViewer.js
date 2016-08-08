@@ -41,7 +41,7 @@
 //		the pixel coordinate of the original image at the center of the viewport
 			self.vCenter = {};
 //		a flag used to decide if a mouse click is part of a drag or a proper click
-			self.dragging = false;
+			self.drag = false;
 			self.pinch = false;
 //		a flag used to check the target image has loaded
 			self.ready = false;
@@ -217,13 +217,37 @@
 					self.update();
 				}
 			}
-
-			$zimg.on( "panstart" , function(ev) {
+			$zimg.on("pan", function(ev) {
 				ev.preventDefault();
-				if (!self.pinch) {
+				console.log(ev.type);
+				if (!self.drag) {
+					self.drag = true;
 					self.dragXorg = self.vCenter.x;
 					self.dragYorg = self.vCenter.y;
 					startRenderLoop();
+				} else {
+					self.vCenter.x = self.dragXorg - ev.gesture.deltaX/self.options.zoom;
+					self.vCenter.y = self.dragYorg - ev.gesture.deltaY/self.options.zoom;
+				}
+			});
+
+			$zimg.on( "panend", function(ev) {
+				ev.preventDefault();
+				if (self.drag) {
+					self.drag = false;
+					stopRenderLoop();
+					self.update();
+				}
+			});
+
+/*			$zimg.on( "panstart" , function(ev) {
+				ev.preventDefault();
+				if (!self.pinch) {
+					self.drag = true;
+					self.dragXorg = self.vCenter.x;
+					self.dragYorg = self.vCenter.y;
+					startRenderLoop();
+					console.log("panstart");
 				}
 			});
 
@@ -232,16 +256,19 @@
 				if (!self.pinch) {
 					self.vCenter.x = self.dragXorg - ev.gesture.deltaX/self.options.zoom;
 					self.vCenter.y = self.dragYorg - ev.gesture.deltaY/self.options.zoom;
+					console.log("panmove");
 				}
 			});
 				
 			$zimg.on( "panend", function(ev) {
 				ev.preventDefault();
 				if (!self.pinch) {
+					self.drag = false;
 					stopRenderLoop();
 					self.update();
 				}
 			});
+*/	
 		},
 /*
  *	Unbind events
@@ -259,8 +286,7 @@
 		_unbind_drag_events: function() {
 			var self = this;
 			var $zimg = $(self.zimg);
-			$zimg.off("panstart");
-			$zimg.off("panmove");
+			$zimg.off("pan");
 			$zimg.off("panend");
 		},	
 
