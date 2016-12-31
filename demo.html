@@ -33,9 +33,10 @@
 <script type="text/javascript">
 ;(function($) {
 		$("#image1").imgViewer({
+			zoomMax: 4,
 			onClick: function( e, self ) {
 				var pos = self.cursorToImg( e.pageX, e.pageY);
-				$("#position").html(e.pageX + " " + e.pageY + " " + pos.x + " " + pos.y);
+				$("#position").html(e.pageX + " " + e.pageY + " " + pos.x + " " + pos.y + "  zoom: " + self.options.zoom);
 			}
 		});
 		function test(e, self) {

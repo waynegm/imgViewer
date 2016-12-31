@@ -15,6 +15,7 @@
 		options: {
 			zoomStep: 0.1,
 			zoom: 1,
+			zoomMax: 0,
 			zoomable: true,
 			dragable: true,
 			onClick: null,
@@ -219,7 +220,6 @@
 			}
 			$zimg.on("pan", function(ev) {
 				ev.preventDefault();
-				console.log(ev.type);
 				if (!self.drag) {
 					self.drag = true;
 					self.dragXorg = self.vCenter.x;
@@ -239,36 +239,6 @@
 					self.update();
 				}
 			});
-
-/*			$zimg.on( "panstart" , function(ev) {
-				ev.preventDefault();
-				if (!self.pinch) {
-					self.drag = true;
-					self.dragXorg = self.vCenter.x;
-					self.dragYorg = self.vCenter.y;
-					startRenderLoop();
-					console.log("panstart");
-				}
-			});
-
-			$zimg.on( "panmove", function(ev) {
-				ev.preventDefault();
-				if (!self.pinch) {
-					self.vCenter.x = self.dragXorg - ev.gesture.deltaX/self.options.zoom;
-					self.vCenter.y = self.dragYorg - ev.gesture.deltaY/self.options.zoom;
-					console.log("panmove");
-				}
-			});
-				
-			$zimg.on( "panend", function(ev) {
-				ev.preventDefault();
-				if (!self.pinch) {
-					self.drag = false;
-					stopRenderLoop();
-					self.update();
-				}
-			});
-*/	
 		},
 /*
  *	Unbind events
@@ -311,6 +281,11 @@
 					break;
 				case 'zoomStep':
 					if (parseFloat(value) <= 0 ||  isNaN(parseFloat(value))) {
+						return;
+					}
+					break;
+				case 'zoomMax':
+					if (parseFloat(value) < 0 || isNaN(parseFloat(value))) {
 						return;
 					}
 					break;
@@ -481,9 +456,14 @@
 					height = $img.height(),
 					offset = $img.offset(),
 					zoom = this.options.zoom,
+					zoomMax = this.options.zoomMax,
 					half_width = width/2,
 					half_height = height/2;
   
+				if (zoomMax !==0) {
+						zoom = Math.min(zoom, zoomMax);
+						this.options.zoom = zoom;
+				}
 				if (zoom <= 1) {
 					zTop = 0;
 					zLeft = 0;

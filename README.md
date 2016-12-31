@@ -75,6 +75,14 @@ $("#image1").imgViewer("option", "zoomStep", 0.05);
 ```javascript
 $("#image1").imgViewer("option", "zoom", 3);
 ```
+###zoomMax
+  * Get/Set the limit on the maximum zoom level of the image - values less than 1 have no affect
+  * Default: 0 (ie no limit on zoom)
+  * Example - to restrict zoom to 3x or less:
+
+```javascript
+$("#image1").imgViewer("option", "zoomMax", 3);
+```
 ###zoomable
   * Controls if image will be zoomable
   * Default: true
@@ -189,6 +197,9 @@ This plugin is provided under the [MIT License](http://opensource.org/licenses/M
 Copyright (c) 2013 Wayne Mogg.
 
 ## Release History
+### 0.9.1
+- Add zoomMax option to limit maximum possible zoom level
+
 ### 0.9.0
 - Replace jquery.event.ue with hammer.js and jquery.hammer.js for more flexibility with touch gesture support
 - Add dragable option allowing user to disable dragging 

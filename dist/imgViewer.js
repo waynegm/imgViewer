@@ -1,4 +1,4 @@
-/*! jQuery imgViewer - v0.9.0 - 2016-08-07
+/*! jQuery imgViewer - v0.9.1 - 2016-12-31
 * https://github.com/waynegm/imgViewer
 * Copyright (c) 2016 Wayne Mogg; Licensed MIT */
 /*
@@ -9,6 +9,7 @@
 		options: {
 			zoomStep: 0.1,
 			zoom: 1,
+			zoomMax: 0,
 			zoomable: true,
 			dragable: true,
 			onClick: null,
@@ -35,7 +36,7 @@
 //		the pixel coordinate of the original image at the center of the viewport
 			self.vCenter = {};
 //		a flag used to decide if a mouse click is part of a drag or a proper click
-			self.dragging = false;
+			self.drag = false;
 			self.pinch = false;
 //		a flag used to check the target image has loaded
 			self.ready = false;
@@ -211,27 +212,23 @@
 					self.update();
 				}
 			}
-
-			$zimg.on( "panstart" , function(ev) {
+			$zimg.on("pan", function(ev) {
 				ev.preventDefault();
-				if (!self.pinch) {
+				if (!self.drag) {
+					self.drag = true;
 					self.dragXorg = self.vCenter.x;
 					self.dragYorg = self.vCenter.y;
 					startRenderLoop();
-				}
-			});
-
-			$zimg.on( "panmove", function(ev) {
-				ev.preventDefault();
-				if (!self.pinch) {
+				} else {
 					self.vCenter.x = self.dragXorg - ev.gesture.deltaX/self.options.zoom;
 					self.vCenter.y = self.dragYorg - ev.gesture.deltaY/self.options.zoom;
 				}
 			});
-				
+
 			$zimg.on( "panend", function(ev) {
 				ev.preventDefault();
-				if (!self.pinch) {
+				if (self.drag) {
+					self.drag = false;
 					stopRenderLoop();
 					self.update();
 				}
@@ -253,8 +250,7 @@
 		_unbind_drag_events: function() {
 			var self = this;
 			var $zimg = $(self.zimg);
-			$zimg.off("panstart");
-			$zimg.off("panmove");
+			$zimg.off("pan");
 			$zimg.off("panend");
 		},	
 
@@ -279,6 +275,11 @@
 					break;
 				case 'zoomStep':
 					if (parseFloat(value) <= 0 ||  isNaN(parseFloat(value))) {
+						return;
+					}
+					break;
+				case 'zoomMax':
+					if (parseFloat(value) < 0 || isNaN(parseFloat(value))) {
 						return;
 					}
 					break;
@@ -449,9 +450,14 @@
 					height = $img.height(),
 					offset = $img.offset(),
 					zoom = this.options.zoom,
+					zoomMax = this.options.zoomMax,
 					half_width = width/2,
 					half_height = height/2;
   
+				if (zoomMax !==0) {
+						zoom = Math.min(zoom, zoomMax);
+						this.options.zoom = zoom;
+				}
 				if (zoom <= 1) {
 					zTop = 0;
 					zLeft = 0;

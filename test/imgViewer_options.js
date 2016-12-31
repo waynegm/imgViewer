@@ -4,8 +4,8 @@
 (function($) {
 	module("imgViewer: options");
 	
-	test( "zoom option", 3, function() {
-		var $img = $("#qunit-fixture img");
+test( "zoom option", 3, function() {
+	var $img = $("#qunit-fixture img");
 	var zoom = 5;
 	var tst = $img.imgViewer({
 		zoom: zoom
@@ -31,6 +31,21 @@ test( "zoomStep option", 3, function() {
 	equal(tst.imgViewer("option", "zoomStep"), step, "set zoomStep option on built object");
 	tst.imgViewer("option", "zoomStep", -0.2);
 	equal(tst.imgViewer("option", "zoomStep"), step, "no change if zoomStep is less than 0");
+	tst.remove();
+});
+
+test( "zoomMax option", 3, function() {
+	var $img = $("#qunit-fixture img");
+	var zmax = 5;
+	var tst = $img.imgViewer({
+		zoomMax: zmax
+	});
+	equal(tst.imgViewer("option", "zoomMax"), zmax, "set zoomMax option in constructor");
+	zmax = 4;
+	tst.imgViewer("option", "zoomMax", zmax);
+	equal(tst.imgViewer("option", "zoomMax"), zmax, "set zoomMax option on built object");
+	tst.imgViewer("option", "zoom", 5);
+	equal(tst.imgViewer("option", "zoom"), zmax, "zoom restricted by zoomMax");
 	tst.remove();
 });
 
