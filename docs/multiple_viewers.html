@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>imgViewer Plugin - Multi-viewer example</title>
+		
+		<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="https://unpkg.com/jquery-mousewheel@3.1.13"></script>
+		<script type="text/javascript" src="lib/hammer.min.js"></script>
+		<script type="text/javascript" src="https://unpkg.com/jquery-hammerjs@2.0.0"></script>
+		<script type="text/javascript" src="lib/imgViewer.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+	</head>
+	<body>
+		<table cellspacing="0" cellpadding="0" border="0" style="width: 100%; min-width: 320px;">
+			<tr>
+			<td style="padding: 10px">
+				<h1 align="center" >imgViewer Plugin - multi-viewer example</h1>
+			
+				<h2 align="center">No Container - Fixed Image Size</h2>
+				<img  id="image1" src="images/test_image.jpg" width="800" />
+				<p> Click Position <span id="position1"> </span></p>
+				
+				<h2 align="center">No Container - Dynamic Width</h2>
+				<img  id="image2" src="images/test_image.jpg" width="90%" />
+				<p> Click Position <span id="position2"> </span></p>
+			
+				<h2 align="center">No Container - Fixed Size with Border and Padding</h2>
+				<img id="image3" src="images/test_image.jpg" style="border: 30px solid #ccc; padding:20px;" width="800"/>
+				<p> Click Position <span id="position3"> </span></p>
+
+				<h2 align="center">Centred in a div - Dynamic Width</h2>
+				<div align="center">
+					<img  id="image4" src="images/test_image.jpg" width="90%" />
+					<p> Click Position <span id="position4"> </span></p>
+				</div>
+			</td>
+			</tr>
+		</table>
+
+<script type="text/javascript">
+;(function($) {
+	$(document).ready(function() {
+		$("#image1").imgViewer({
+			onClick: function( e ) {
+				var pos = this.cursorToImg( e.pageX, e.pageY);
+				var imgpos = this.relposToImage(pos);
+				$("#position1").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+			}
+		});
+
+		function click_test2(e) {
+				var pos = this.cursorToImg( e.pageX, e.pageY);
+				var imgpos = this.relposToImage(pos);
+				$("#position2").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+		}
+		var $img = $("#image2").imgViewer();
+		$img.imgViewer("option", "onClick", click_test2);
+		
+		$("#image3").imgViewer({
+			onClick: function( e ) {
+				var pos = this.cursorToImg( e.pageX, e.pageY);
+				var imgpos = this.relposToImage(pos);
+				$("#position3").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+			}
+		});
+		
+		$("#image4").imgViewer({
+			onClick: function(e) {
+				var pos = this.cursorToImg( e.pageX, e.pageY);
+				var imgpos = this.relposToImage(pos);
+				$("#position4").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+			}
+		});
+	});
+})(jQuery);
+</script>
+		</body>
+</html>

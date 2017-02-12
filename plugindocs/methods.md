@@ -1,0 +1,80 @@
+ #Plugin Methods
+##destroy
+  * Destroys the plugin
+  * No Arguments
+  * No return
+
+##cursorToImg
+  * Convert page pixel coordinates to relative image coordinate for the current view and zoom
+  * Arguments:
+	* pageX: x coordinate in pixel(page) coordinates
+	* pageY: y coordiante in pixel(page) coordinates
+  * Returns javascript object with relative image coordinates (relative image coordinates range from 0 to 1
+   where 0,0 correspondes to the topleft corner and 1,1 the bottom right):
+	* { x: relative x image coordinate, y: relative y image coordinate }
+  * Returns null if the page coordinate is outside the image viewport.
+
+##getView
+  * Get the relative image coordinates of the current view
+  * Returns a javascript object with the relative image coordinates:
+	* { top: minimum relative y coordinate,
+	*	left: minimum relative x coordinate,
+	*	bottom: maximum relative y image coordinate,
+	*	right: maximum relative x coordinate
+	* }
+	
+##imgToCursor
+  * Convert relative image coordinate to a page pixel coordinate for the current view and zoom
+  * Arguments:
+	* relx: relative x image coordinate
+	* rely: relative y image coordinate
+  * Returns a javascript object with the page pixel coordinates:
+	* { x: the x page pixel coordinate, y: the y page pixel coordinate }
+  * Returns null if the relative image coordinates are not >=0 and <=1.
+
+##imgToView
+  * Convert relative image coordinate to a viewport pixel location, ie pixel in the zoomed image
+  * Arguments:
+	* relx: relative x image coordinate
+	* rely: relative y image coordinate
+  * Returns a javascript object with the viewport pixel coordinates:
+	* { x: the x viewport pixel coordinate, y: the y viewport pixel coordinate }
+  * Returns null if the relative image coordinates are not >=0 and <=1.
+
+##viewToImg
+  * Convert a viewport pixel location to a relative image coordinate
+  * Arguments:
+    * viewX: x coordinate in viewport pixels
+    * viewY: y coordinate in viewport pixels
+  * Returns a javascript object with the relative image coordinates:
+	* { x: relative x image coordinate, y: relative y image coordinate }
+  * Returns null if the viewport pixel location is outside the zoomed image.
+
+##relposToImage
+  * Convert relative image point to image pixel point
+  * Arguments:
+    * { x: relative x image coordinate, y: relative y image coordinate }
+  * Returns a javascript object with the image pixel coordinates:
+	* { x: the x image pixel coordinate, y: the y image pixel coordinate } 
+	* 
+##isVisible
+  * Test is a given relative image coordinate is within the bounds of the current view
+  * Arguments:
+	* relx: relative x image coordinate
+	* rely: relative y image coordinate
+  * Returns
+	* true or false
+
+##panTo
+  * Pan the view to be centred at the given relative image coordinates
+  * Arguments:
+	* relx: relative x image coordinate
+	* rely: relative y image coordinate
+  * Returns a javascript object with the relative image coordinates of the view centre after snapping the edges of the zoomed image to the view boundaries.
+	* { x: view center relative x image coordinate, y: view center relative y image coordinate }
+  * Returns null if the relative image coordinates are not >=0 and <=1 and the view is not changed. 
+
+##update
+  * Update the image display
+  * No arguments
+  * No return
