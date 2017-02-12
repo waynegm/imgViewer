@@ -131,21 +131,9 @@ var waitForFinalEvent = (function () {
 			$zimg.on("tap", function(ev) {
 				ev.preventDefault();
 				if (!self.dragging) {
-					var sx,sy;
-					if (window.scrollX === undefined) {
-						if (window.pageXOffset === undefined) {
-							sx = document.documentElement.scrollLeft;
-							sy = document.documentElement.scrollTop;
-						} else {
-							sx = window.pageXOffset;
-							sy = window.pageYOffset;
-						}
-					} else {
-						sx = window.scrollX;
-						sy = window.scrollY;
-					}
-					ev.pageX = ev.gesture.center.x + sx;
-					ev.pageY = ev.gesture.center.y + sy;
+					var scoff = self._get_scroll_offset();
+					ev.pageX = ev.gesture.center.x + scoff.x;
+					ev.pageY = ev.gesture.center.y + scoff.y;
 					self.options.onClick.call(self, ev);
 				}
 			});			
@@ -165,12 +153,28 @@ var waitForFinalEvent = (function () {
 			self.options.onReady.call(self);
 		},
 /*
- *	View resize
+ *	Return the window scroll offset - required to convert Hammer.js event coords to page locations
+ */
+		_get_scroll_offset: function() {
+			var sx,sy;
+			if (window.scrollX === undefined) {
+				if (window.pageXOffset === undefined) {
+					sx = document.documentElement.scrollLeft;
+					sy = document.documentElement.scrollTop;
+				} else {
+					sx = window.pageXOffset;
+					sy = window.pageYOffset;
+				}
+			} else {
+				sx = window.scrollX;
+				sy = window.scrollY;
+			}
+			return {x: sx, y: sy};
+		},
+/*
+ *	View resize - the aim is to keep the view centered on the same location in the original image
  */
 		_view_resize: function() {
-/*
- *		the aim is to keep the view centered on the same location in the original image
- */
 			if (this.ready) {
 				var $view = $(this.view),
 					$img = $(this.img),
@@ -233,7 +237,8 @@ var waitForFinalEvent = (function () {
 			$zimg.on("pinch", function(ev) {
 				ev.preventDefault();
 				if (!self.pinch) {
-					self.pinchstart = { x: ev.gesture.center.x, y: ev.gesture.center.y};
+					var scoff = self._get_scroll_offset();
+					self.pinchstart = { x: ev.gesture.center.x+scoff.x, y: ev.gesture.center.y+scoff.y};
 					self.pinchstartrelpos = self.cursorToImg(self.pinchstart.x, self.pinchstart.y);
 					self.pinchstart_scale = self.options.zoom;
 					startRenderLoop();
