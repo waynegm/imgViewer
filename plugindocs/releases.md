@@ -1,4 +1,6 @@
 #Release History
+## 1.0.1
+- replace call to img.load() event trigger depreciated in jQuery 3 with img.trigger("load") 
 ## 1.0.0
 - Restructure repository layout
 - Change build system from grunt to vanilla npm

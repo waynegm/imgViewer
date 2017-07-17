@@ -1,6 +1,6 @@
 {
   "name": "imgviewer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "extensible, responsive jquery plugin to zoom and pan images",
   "keywords": ["jquery-plugin", "ecosystem:jquery", "image"],
   "repository": {"type": "git", "url": "https://github.com/waynegm/imgViewer.git"},
