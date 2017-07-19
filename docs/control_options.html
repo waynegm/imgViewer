@@ -35,69 +35,71 @@
 
 <script type="text/javascript">
 ;(function($) {
-	$(document).ready(function() {
+    $(window).on("load", function() {
+    $(document).ready(function() {
 
-		var $zoom = $('#zoom');
-		
-		var $img = $("#image1").imgViewer({
-			zoomMax: 6,
-			zoomable: false,
-			dragable: false,
-			onReady: function() {
-				this.options.zoom = 3;
-				this.panTo(1,1);
-			},
-			onUpdate:function() {
-				$zoom.val(this.options.zoom);
-			}
-		});
+        var $zoom = $('#zoom');
+        
+        var $img = $("#image1").imgViewer({
+            zoomMax: 6,
+            zoomable: false,
+            dragable: false,
+            onReady: function() {
+                this.options.zoom = 3;
+                this.panTo(1,1);
+            },
+            onUpdate:function() {
+                $zoom.val(this.options.zoom);
+            }
+        });
 
-		var $toggleZ = $("#toggleZoom");
-		if ($img.imgViewer("option","zoomable"))
-			$toggleZ.text("Zoom Off");
-		else
-			$toggleZ.text("Zoom On");
-		
-		$toggleZ.on("click", function() {
-			var $this = $(this);
-			if ($this.text()=="Zoom On") {
-				$this.text("Zoom Off");
-				$img.imgViewer("option","zoomable", true);
-			} else {
-				$this.text("Zoom On");
-				$img.imgViewer("option","zoomable", false);
-			}
-		});
+        var $toggleZ = $("#toggleZoom");
+        if ($img.imgViewer("option","zoomable"))
+            $toggleZ.text("Zoom Off");
+        else
+            $toggleZ.text("Zoom On");
+        
+        $toggleZ.on("click", function() {
+            var $this = $(this);
+            if ($this.text()=="Zoom On") {
+                $this.text("Zoom Off");
+                $img.imgViewer("option","zoomable", true);
+            } else {
+                $this.text("Zoom On");
+                $img.imgViewer("option","zoomable", false);
+            }
+        });
 
-		var $toggleD = $("#toggleDrag");
-		if ($img.imgViewer("option","dragable"))
-			$toggleD.text("Drag Off");
-		else
-			$toggleD.text("Drag On");
-		
-		$toggleD.on("click", function() {
-			var $this = $(this);
-			if ($this.text()=="Drag On") {
-				$this.text("Drag Off");
-				$img.imgViewer("option","dragable", true);
-			} else {
-				$this.text("Drag On");
-				$img.imgViewer("option","dragable", false);
-			}	
-		});
+        var $toggleD = $("#toggleDrag");
+        if ($img.imgViewer("option","dragable"))
+            $toggleD.text("Drag Off");
+        else
+            $toggleD.text("Drag On");
+        
+        $toggleD.on("click", function() {
+            var $this = $(this);
+            if ($this.text()=="Drag On") {
+                $this.text("Drag Off");
+                $img.imgViewer("option","dragable", true);
+            } else {
+                $this.text("Drag On");
+                $img.imgViewer("option","dragable", false);
+            }	
+        });
 
-		$zoom.on ('change', function(e) {
-			$img.imgViewer("option", "zoom", $(this).val());
-		});
+        $zoom.on ('change', function(e) {
+            $img.imgViewer("option", "zoom", $(this).val());
+        });
 
-		var mxZoom = $img.imgViewer("option","zoomMax");
-		if (mxZoom !== null) {
-			$('#mxzoom').val(mxZoom);
-		}
-		$('#mxzoom').on( 'change', function(e) {
-			$img.imgViewer("option", "zoomMax", $(this).val());
-		});
-	});
+        var mxZoom = $img.imgViewer("option","zoomMax");
+        if (mxZoom !== null) {
+            $('#mxzoom').val(mxZoom);
+        }
+        $('#mxzoom').on( 'change', function(e) {
+            $img.imgViewer("option", "zoomMax", $(this).val());
+        });
+    });
+    });
 		
 })(jQuery);
 </script>
