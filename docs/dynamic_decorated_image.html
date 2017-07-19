@@ -24,9 +24,11 @@
 
 		<script type="text/javascript">
 			;(function($) {
-				$(document).ready(function(){
-					var $img = $("#image1").imgViewer();
-				});
+                $(window).on("load", function() {
+                    $(document).ready(function(){
+                        var $img = $("#image1").imgViewer();
+                    });
+                });
 			})(jQuery);
 		</script>
 	</body>
