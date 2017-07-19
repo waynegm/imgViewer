@@ -30,18 +30,20 @@
 
 		<script type="text/javascript">
 			;(function($) {
-				$(document).ready(function() {
-					var $img = $("#image1").imgViewer({
-								onClick: function(e) {
-									var $message = $("<div id='dialog-modal'></div>").dialog({
-														modal: true,
-														title: "You clicked at:",
-									});
-									var pos = this.cursorToImg(e.pageX, e.pageY);
-									var imgpos = this.relposToImage(pos);
-									$message.html("Page X: " + e.pageX + "<br/>Page Y: " + e.pageY + "<br/>Image Pixel X: " + imgpos.x + "<br/>Image Pixel Y: " + imgpos.y + "<br/>Image Rel X: " + pos.x.toFixed(3) + "<br/>Image Rel Y: " + pos.y.toFixed(3));
-								}
-					});
+                $(window).on("load", function() {
+                    $(document).ready(function() {
+                        var $img = $("#image1").imgViewer({
+                                    onClick: function(e) {
+                                        var $message = $("<div id='dialog-modal'></div>").dialog({
+                                                            modal: true,
+                                                            title: "You clicked at:",
+                                        });
+                                        var pos = this.cursorToImg(e.pageX, e.pageY);
+                                        var imgpos = this.relposToImage(pos);
+                                        $message.html("Page X: " + e.pageX + "<br/>Page Y: " + e.pageY + "<br/>Image Pixel X: " + imgpos.x + "<br/>Image Pixel Y: " + imgpos.y + "<br/>Image Rel X: " +    pos.x.toFixed(3) + "<br/>Image Rel Y: " + pos.y.toFixed(3));
+                                    }
+                        });
+                    });
 				});
 			})(jQuery);
 		</script>

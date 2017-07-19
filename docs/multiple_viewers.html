@@ -40,38 +40,40 @@
 
 <script type="text/javascript">
 ;(function($) {
-	$(document).ready(function() {
-		$("#image1").imgViewer({
-			onClick: function( e ) {
-				var pos = this.cursorToImg( e.pageX, e.pageY);
-				var imgpos = this.relposToImage(pos);
-				$("#position1").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
-			}
-		});
+    $(window).on("load", function() {
+        $(document).ready(function() {
+            $("#image1").imgViewer({
+                onClick: function( e ) {
+                    var pos = this.cursorToImg( e.pageX, e.pageY);
+                    var imgpos = this.relposToImage(pos);
+                    $("#position1").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+                }
+            });
 
-		function click_test2(e) {
-				var pos = this.cursorToImg( e.pageX, e.pageY);
-				var imgpos = this.relposToImage(pos);
-				$("#position2").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
-		}
-		var $img = $("#image2").imgViewer();
-		$img.imgViewer("option", "onClick", click_test2);
+            function click_test2(e) {
+                    var pos = this.cursorToImg( e.pageX, e.pageY);
+                    var imgpos = this.relposToImage(pos);
+                    $("#position2").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+            }
+            var $img = $("#image2").imgViewer();
+            $img.imgViewer("option", "onClick", click_test2);
 		
-		$("#image3").imgViewer({
-			onClick: function( e ) {
-				var pos = this.cursorToImg( e.pageX, e.pageY);
-				var imgpos = this.relposToImage(pos);
-				$("#position3").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
-			}
-		});
+            $("#image3").imgViewer({
+                onClick: function( e ) {
+                    var pos = this.cursorToImg( e.pageX, e.pageY);
+                    var imgpos = this.relposToImage(pos);
+                    $("#position3").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+                }
+            });
 		
-		$("#image4").imgViewer({
-			onClick: function(e) {
-				var pos = this.cursorToImg( e.pageX, e.pageY);
-				var imgpos = this.relposToImage(pos);
-				$("#position4").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
-			}
-		});
+            $("#image4").imgViewer({
+                onClick: function(e) {
+                    var pos = this.cursorToImg( e.pageX, e.pageY);
+                    var imgpos = this.relposToImage(pos);
+                    $("#position4").html("Page X: " + e.pageX + " Page Y: " + e.pageY + " Image X: " + imgpos.x + " Image Y: " + imgpos.y + "  Zoom: " + this.options.zoom);
+                }
+            });
+        });
 	});
 })(jQuery);
 </script>
